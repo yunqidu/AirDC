@@ -1,3 +1,3 @@
-# ISLDV 
-This is the official PyTorch implementation of "ISLDV : Robust Iterative Stereo-LiDAR Depth Volume for Long Range Depth Completion"
+# RefDC 
+This is the official PyTorch implementation of "RefDC:Iterative Hypothesis-guided Depth Refinement for Long Range Stereo-LiDAR Depth Completion"
 Code is coming soon...
