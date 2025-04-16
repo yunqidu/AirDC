@@ -46,9 +46,11 @@ The overall data directory is structured as follows:
 
 ### Virtual KITTI 2.0
 Virtual KITTI 2.0 dataset is available at the [Virtual KITTI 2.0 Website](https://europe.naverlabs.com/proxy-virtual-worlds-vkitti-2).
+```
 ├── vkitti2
 |   ├── Scene01
 |   |  ├── 15-deg-left
 |   |  |  ├──── frames
 |   |  |  |  ├── depth
 |   |  |  |  ├── rgb      
+```
