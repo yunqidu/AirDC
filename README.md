@@ -18,7 +18,6 @@ coming soon...
 ## 💾 Datasets
 We used two datasets(KITTIDC and Virtual KITTI 2.0) for training and three datasets for evaluation.
 ### KITTI Depth Completion (KITTI DC)
-#### KITTI Depth Completion (KITTI DC)
 
 KITTI DC dataset is available at the [KITTI DC Website](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion).
 For color images, KITTI Raw dataset is also needed, which is available at the [KITTI Raw Website](http://www.cvlibs.net/datasets/kitti/raw_data.php). 
