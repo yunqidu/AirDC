@@ -59,5 +59,3 @@ Virtual KITTI 2.0 dataset is available at the [Virtual KITTI 2.0 Website](https:
 |   |  |  |  ├── rgb      
 ```
 
-## Acknowledgements
-Thanks to
