@@ -1,5 +1,5 @@
 <h2>
-<a href="https://github.com/duyunqi/AirDC/" target="_blank">RefDC : Iterative Hypothesis-guided Depth Refinement for Long Range Stereo-LiDAR Depth Completion </a>
+<a href="https://github.com/duyunqi/AirDC/" target="_blank">AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Absolute Depth Completion</a>
 </h2>
     
 This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Absolute Depth Completion"
