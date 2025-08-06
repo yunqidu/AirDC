@@ -4,12 +4,12 @@
     
 This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Absolute Depth Completion"
 
-<img width="359" height="324.4" alt="gpu" src="https://github.com/user-attachments/assets/9d98c2db-74f9-46ae-81a6-953dc8a0820e" />
+<img width="359" height="324.4" alt="gpu" src="https://github.com/user-attachments/assets/c88ce5d2-9b1d-4a9a-8955-c22ccdb445f4" />
 
 
 
 ## 🔍 Introduction
-
+ 
 
 
 
