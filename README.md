@@ -2,7 +2,7 @@
 <a href="https://github.com/duyunqi/AirDC/" target="_blank">AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion</a>
 </h2>
     
-This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Absolute Depth Completion"
+This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion".
 
 <img width="431" height="304" alt="gpu" src="https://github.com/user-attachments/assets/766b7305-0045-496c-b2a4-1d4572719a39"/>
 
@@ -13,11 +13,12 @@ This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth 
 
 
 ## 💻 Code 
-coming soon...
+Coming soon...
 
 
 ## 💾 Datasets
-We used two datasets(KITTIDC and Virtual KITTI 2.0) for training and three datasets for evaluation.
+We used three datasets (KITTI DC, Virtual KITTI 2.0, and MS2) for both training and evaluation.
+
 ### KITTI Depth Completion (KITTI DC)
 
 KITTI DC dataset is available at the [KITTI DC Website](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion).
@@ -51,13 +52,25 @@ The overall data directory is structured as follows:
 
 ### Virtual KITTI 2.0
 Virtual KITTI 2.0 dataset is available at the [Virtual KITTI 2.0 Website](https://europe.naverlabs.com/proxy-virtual-worlds-vkitti-2).
+Virtual KITTI 2.0 dataset contains multiple scenes for training and testing.
+- **Training**: `Scene01`, `Scene02`
+- **Testing / Validation**: `Scene06`, `Scene18`, `Scene20`
 ```
 ├── vkitti2
 |   ├── Scene01
 |   |  ├── 15-deg-left
 |   |  |  ├──── frames
 |   |  |  |  ├── depth
-|   |  |  |  ├── rgb      
+|   |  |  |  |  ├── Camera_0
+|   |  |  |  |  ├── Camera_1
+|   |  |  |  ├── rgb
+|   |  |  |  |  ├── Camera_0
+|   |  |  |  |  ├── Camera_1
+|   |  ├── ...
+|   ├── Scene02
+|   ├── Scene06
+|   ├── Scene18
+|   ├── Scene20
 ```
 
 ### MS2 Dataset
