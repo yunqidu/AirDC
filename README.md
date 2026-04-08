@@ -4,8 +4,7 @@
     
 This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Absolute Depth Completion"
 
-<img width="431" height="304" alt="gpu" src="https://github.com/user-attachments/assets/c88ce5d2-9b1d-4a9a-8955-c22ccdb445f4" />
-
+<img width="431" height="304" alt="gpu" src="https://github.com/user-attachments/assets/766b7305-0045-496c-b2a4-1d4572719a39"/>
 
 
 ## 🔍 Introduction
@@ -61,3 +60,28 @@ Virtual KITTI 2.0 dataset is available at the [Virtual KITTI 2.0 Website](https:
 |   |  |  |  ├── rgb      
 ```
 
+### MS2 Dataset
+MS2 dataset is available at the [MS2 Website](https://sites.google.com/view/multi-spectral-stereo-dataset/home).
+MS2 dataset contains multiple sequences for training and testing.
+- **Training**: `_2021-08-06-11-23-45` (urban), `_2021-08-13-16-14-48` (Residential), `_2021-08-13-16-31-10` (road1), `_2021-08-13-17-06-04` (campus)
+- **Testing / Validation**: `_2021-08-13-16-08-46` (road3)
+
+The overall data directory is structured as follows:
+
+```
+├── ms2
+|   ├── sync_data
+|   |  ├── _2021-08-06-11-23-45
+|   |  |  ├── calib.npy
+|   |  |  ├── rgb
+|   |  |  |  ├── img_left
+|   |  |  |  ├── img_right
+|   |  ├── _2021-08-13-16-14-48
+|   |  ├── ...
+|   ├── proj_depth
+|   |  ├── _2021-08-06-11-23-45
+|   |  |  ├── depth
+|   |  |  ├── depth_filtered
+|   |  ├── _2021-08-13-16-14-48
+|   |  ├── ...
+```
