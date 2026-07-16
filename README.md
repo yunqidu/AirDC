@@ -2,14 +2,33 @@
 <a href="https://github.com/duyunqi/AirDC/" target="_blank">AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion</a>
 </h2>
     
-This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion".
+This is the official PyTorch implementation of **AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion**, accepted by and published in *IEEE Transactions on Image Processing* (TIP), 2026.
 
 <img width="431" height="304" alt="gpu" src="https://github.com/user-attachments/assets/766b7305-0045-496c-b2a4-1d4572719a39"/>
 
 
 ## 🔍 Introduction
- 
+ **AirDC** is an adaptive iterative depth refinement framework for full-range metric depth completion. The paper has been accepted by and published in *IEEE Transactions on Image Processing* (TIP), Volume 35, pages 6658–6673, 2026.
 
+- **Paper:** [IEEE Xplore](https://doi.org/10.1109/TIP.2026.3700921)
+- **DOI:** [10.1109/TIP.2026.3700921](https://doi.org/10.1109/TIP.2026.3700921)
+
+
+## 📝 Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@ARTICLE{11559200,
+  author={Shi, Hongyu and Du, Yunqi and Zhang, Hongjuan and Li, Wenzhuo and Dong, Zhen and Li, Bijun and Tang, Luliang},
+  journal={IEEE Transactions on Image Processing}, 
+  title={AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion}, 
+  year={2026},
+  volume={35},
+  pages={6658-6673},
+  keywords={Laser radar;Modeling;Distance measurement;Modules (abstract algebra);Measurement;Depth measurement;Accuracy;Conferences;Computers;Computer vision;Depth completion;multi-modal fusion;full-range;attention mechanism},
+  doi={10.1109/TIP.2026.3700921}}
+```
 
 
 ## 💻 Code 
