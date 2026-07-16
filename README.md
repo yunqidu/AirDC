@@ -13,7 +13,7 @@ This is the official PyTorch implementation of "AirDC: Adaptive Iterative Depth 
 
 
 ## 💻 Code 
-Coming soon...
+All code and checkpoints will be released before July 26.
 
 
 ## 💾 Datasets
