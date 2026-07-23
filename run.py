@@ -611,10 +611,9 @@ if __name__ == "__main__":
                     current_val_loss = run_val(config_val, args_val, model, val_loader,
                                             val_visualize_indices, device,
                                             single_val=True, rank=rank, local_rank=local_rank,
-                                            silent=True) # Requires optional silent support in run_val.
+                                            silent=True)
                     
                     # RMSE extraction placeholder for benchmark mode.
-                    # run_val may need to return explicit RMSE values.
                     rmse_val = "evaluating" # Placeholder until run_val returns RMSE explicitly.
                 
                 # Memory and latency benchmark.

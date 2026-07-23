@@ -92,7 +92,6 @@ class MMGIG(nn.Module):
 
         if self.args.update_with == "igevplusplus":
             cor_planes = 96 +args.corr_levels * (2*args.corr_radius + 1) *(1+(1 if 'depth' in args.geo_fn_mode else 0))
-        # elif self.args.update_with == "selective" and self.args.attention_active:
             cor_planes=96
         self.convc1 = (nn.Conv2d(cor_planes, 64, 1, padding=0))
         self.convc2 = nn.Conv2d(64, 64, 3, padding=1)

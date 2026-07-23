@@ -150,7 +150,7 @@ def vis_project(volume_orig, volume_change,depth=25):
         for spine in a.spines.values():
             spine.set_visible(True)  # Show the axis spine.
             spine.set_linewidth(2)  # Set the line width.
-            spine.set_edgecolor('red')  # Alternative high-contrast colors can be used.
+            spine.set_edgecolor('red')  # Highlight the comparison border.
     plt.title(f"Shifted on Depth={i}")
     plt.tight_layout()
     plt.savefig(f'depth={i}_shifted_compare_uint8.png', dpi=350)

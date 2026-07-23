@@ -1,7 +1,7 @@
 <h2>
 <a href="https://github.com/yunqidu/AirDC/" target="_blank">AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion</a>
 </h2>
-    
+
 This is the official PyTorch implementation of **AirDC: Adaptive Iterative Depth Refinement Framework for Full-Range Metric Depth Completion**, published in *IEEE Transactions on Image Processing* (TIP), 2026.
 
 
@@ -70,7 +70,7 @@ AirDC/
 │   └── vk2_2424.pth
 ```
 
-Converted public AirDC checkpoints should be saved under `log/ckpt/`:
+Save converted public AirDC checkpoints under `log/ckpt/`:
 
 ```text
 AirDC/
@@ -267,7 +267,7 @@ We used three datasets (KITTI DC, Virtual KITTI 2.0, and MS2) for both training 
 ### KITTI Depth Completion (KITTI DC)
 
 KITTI DC dataset is available at the [KITTI DC Website](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion).
-For color images, KITTI Raw dataset is also needed, which is available at the [KITTI Raw Website](http://www.cvlibs.net/datasets/kitti/raw_data.php). 
+Color images are provided by the KITTI Raw dataset, available at the [KITTI Raw Website](http://www.cvlibs.net/datasets/kitti/raw_data.php).
 
 The overall data directory is structured as follows:
 

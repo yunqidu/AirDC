@@ -29,9 +29,7 @@ class Hypothesis_guided_Cross_scale_Feature_Fusion:
         self.baseline = baseline
         self.steps = args.steps
 
-        # all pairs correlation
-        # Compute left-right feature correlation.
-        # init_fmap1:[b 96 1/4 1/4]
+        # Compute all-pairs left-right feature correlation.
         init_corr = Hypothesis_guided_Cross_scale_Feature_Fusion.corr(init_fmap1, init_fmap2) #(b,h/4,w/4,w/4)
 
         b, h, w, _, w2 = init_corr.shape
@@ -55,9 +53,8 @@ class Hypothesis_guided_Cross_scale_Feature_Fusion:
 
     def __call__(self, depth, coords,curr_f,curr_steps,D_all):
         epsilon = 1e-6
-        # depth: [b, 1, h, w] current depth estimate with shape [B, 1, H, W].
+        # depth: Current depth estimate with shape [B, 1, H, W].
         # coords: [B, H, W, 1], pixel coordinates for each image location.
-        # depth: Current depth map [B,H,W]
         # curr_f: Current focal length.
         # r: Search radius.
 

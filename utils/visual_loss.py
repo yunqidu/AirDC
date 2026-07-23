@@ -393,7 +393,7 @@ def apply_colormap_to_depth(depth, stretch_range=None, colormap=plt.cm.jet):
     if depth.dim()== 2:
         depth = depth.unsqueeze(0)  # Add batch dimension
     assert depth.dim() == 3, "Depth should have 3 dimensions (B, H, W)"
-    # Move tensor to CPU and convert to numpy array
+    # Move tensor to CPU and convert it to a NumPy array.
     depth_np = depth.cpu().detach().numpy()
 
     if stretch_range is None:
@@ -406,9 +406,9 @@ def apply_colormap_to_depth(depth, stretch_range=None, colormap=plt.cm.jet):
     if min_depth == max_depth:
         normalized_depth = np.zeros_like(depth_np)  # Assign a default value, here 0
     else:
-        # Normalize depth to [0, 1]
+        # Normalize depth to [0, 1].
         normalized_depth = (depth_np - min_depth) / (max_depth - min_depth)
-        normalized_depth = np.clip(normalized_depth, 0, 1)  # Clip to ensure values are within [0, 1]
+        normalized_depth = np.clip(normalized_depth, 0, 1)  # Clip values to [0, 1].
 
     normalized_depth[depth_np == -1] = 0  # Set background to black
 

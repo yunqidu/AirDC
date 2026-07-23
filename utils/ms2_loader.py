@@ -357,17 +357,6 @@ class MS2Depth(data.Dataset):
             sparse_hint_list.append(
                 samp.replace('sync_data', 'proj_depth').replace('img_left', 'depth'))
 
-        # Disable this block when all 1272 frames are required.
-        #     np.random.seed(1000)
-        #     np.random.set_state(state)
-            
-        if split == 'train':
-            # Optional debug subset that limits the training set to the first 10 samples.
-            img_left_list = img_left_list#[:20]
-            img_right_list = img_right_list#[:20]
-            disp_gt_list = disp_gt_list#[:20]
-            sparse_hint_list = sparse_hint_list#[:20]
-
         if self.return_left_right:
             paths = {
                 "left_rgb": img_left_list,
@@ -571,4 +560,3 @@ class MS2Depth(data.Dataset):
 
     def __len__(self):
         return len(self.paths['d'])
-

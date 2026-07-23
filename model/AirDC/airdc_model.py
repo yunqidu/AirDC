@@ -628,27 +628,22 @@ class AirDC(nn.Module):
                                                                             h_down_img, w_down_img,
                                                                             max_depth=self.args.z_max // near1_factor,
                                                                             interval=D_all / (self.args.z_max * near1_factor) * 4)
-                # 100mcorresponds to D=50 with interval=2m
+                # The full-range branch covers 100 m with a 2 m depth interval.
                 init_depth_all, geo_encoding_volume_all = self.agg_all(volume_all,
                                                                        h_down_img, w_down_img,
                                                                        max_depth=self.args.z_max,
                                                                        interval=D_all / (self.args.z_max) * 4)
 
-                #                                                   init_depth_all], dim=1))
-
                 init_depth = init_depth_all
 
             else:
-                # # Enable this block with vis_project for shift visualization.
                 D_all=self.args.D
-                # New volume construction uses get_volume.
-                # Legacy volume construction uses get_volume_original and may introduce small coordinate-rounding shifts.
+                # Build the original cost volume.
                 volume=self.get_volume_original(left_rgb_feat,
                                                        right_rgb_feat,
                                                        d_index, points_d,
                                                        mask_d,
                                                        f=P[:, 0, 0],D_all=D_all)
-                # vis_project(volume_ori,volume,2)
                 if self.args.get("volume_att", False):
                     volume_out = self.asr_net(volume, features=features_left_d)
                     out1 = self.classifier(volume_out)
@@ -693,7 +688,6 @@ class AirDC(nn.Module):
                         if self.args.convolutional_layer_encoding == 'z':
                             depth_geo_feat = self.cal_geo_feat(P, batch["position"], depth)
                         cnet_list = self.context_extractor(left_norm, depth=depth, depth_geo_feat=depth_geo_feat)
-                    # elif self.args.update_with == "selective" and self.args.attention_active:
                     else:
                         cnet_list = self.context_extractor(left_norm, depth=depth)
 

@@ -445,7 +445,7 @@ def model_load_checkpoint(model, optimizer, scheduler, scaler, load_path, device
     model_state_dict = model.state_dict()
     checkpoint_state_dict = checkpoint['model_state_dict']
 
-    # Detect whether the module. prefix must be added or removed.
+    # Detect module. prefix alignment between checkpoint and model keys.
     def adjust_keys(state_dict, add_module=False, remove_module=False):
         if add_module:
             return {f'module.{k}': v for k, v in state_dict.items()}
