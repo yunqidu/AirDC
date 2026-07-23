@@ -1,0 +1,14 @@
+log/
+.DS_Store
+*.tex
+.idea/
+.vscode/
+*.png
+*.pth.tar
+*.pth
+
+vis/
+*.pth
+*.zip
+
+__pycache__/
