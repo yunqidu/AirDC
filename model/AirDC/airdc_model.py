@@ -26,7 +26,6 @@ from utils.fit_utils import LayerTimer
 class AirDC(nn.Module):
     def __init__(self, args, dtype=torch.float16):
         super(AirDC, self).__init__()
-        # self.coarse_branch = ENet()
         self.args = args
         self.baseline = 0.54
         self.embed_channels = args.embed_channels
@@ -77,8 +76,6 @@ class AirDC(nn.Module):
             self.classifier0 = nn.Conv3d(8, 1, 3, 1, 1, bias=False)
             self.classifier1 = nn.Conv3d(8, 1, 3, 1, 1, bias=False)
 
-            # self.avg1=nn.AvgPool3d(kernel_size=(2, 1, 1), stride=(2, 1, 1))
-            # self.avg2=nn.AvgPool3d(kernel_size=(2, 1, 1), stride=(2, 1, 1))
             self.near_patch0 = nn.Conv3d(self.in_hg_channels, self.in_hg_channels, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
             self.near_patch1 = nn.Conv3d(self.in_hg_channels, self.in_hg_channels, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
             self.all_patch = nn.Conv3d(self.in_hg_channels, self.in_hg_channels, kernel_size=(1, 1, 1), stride=(1, 1, 1),
@@ -105,34 +102,10 @@ class AirDC(nn.Module):
             Conv3dGn(in_channels=args.embed_channels, out_channels=args.embed_channels, kernel_size=3, stride=1,
                      padding=1, dilation=1,
                      use_relu=True, depth_wise=True if self.args.depth_wise else False),
-            # Conv3dGn(in_channels=args.embed_channels, out_channels=args.embed_channels, kernel_size=3, stride=1,
-            #          padding=1, dilation=1,
-            #          use_relu=True, depth_wise=True if self.args.depth_wise else False),
             nn.Conv3d(in_channels=args.embed_channels, out_channels=1, kernel_size=3, stride=1, padding=1,
                       dilation=1, bias=False),
-            # nn.ReLU(inplace=True),
 
         )
-            # if self.args.attention_active:
-            #     self.backbone = Backbone(args)
-                # self.selective_conv = nn.Sequential(
-                #     BasicConv(128, 128, kernel_size=1, stride=1, padding=0),
-                #     BasicConv(128, 128, kernel_size=3, stride=1, padding=1),
-                #     nn.Conv2d(128, 3, 3, 1, 1, bias=False),
-                # )
-                # self.geo_feat_proj=BasicConv(self.args.corr_levels * (2*args.corr_radius + 1)
-                #                              *8 ,96,kernel_size=1,stride=1,padding=0)
-                # self.corr_proj=BasicConv(self.args.corr_levels * (2*args.corr_radius + 1)
-                #                              *1 ,96,kernel_size=1,stride=1,padding=0)
-                # self.depth_attention_module=DepthAttentionModule()
-                # if ('depth' in self.args.geo_fn_mode):
-                #     self.depth_proj=BasicConv(self.args.corr_levels * (2*args.corr_radius + 1)
-                #                                  *1 ,96,kernel_size=1,stride=1,padding=0)
-                # self.feat_conv=nn.Sequential(
-                #     BasicConv( 96*3, 64, kernel_size=1, stride=1, padding=0),
-                #     BasicConv(64, 64, kernel_size=3, stride=1, padding=1),
-                #     )
-                # self.depth_upconv=BasicConv(1, 32, kernel_size=3, stride=1, padding=1)
 
         self.convout = Conv3dGn(in_channels=args.embed_channels, out_channels=8,
                                 kernel_size=3, stride=1, padding=1,
@@ -144,22 +117,6 @@ class AirDC(nn.Module):
         self.sparsepooling = SparseDownSampleClose(stride=2)
         self.spx_2_gru = Conv2x(32, 32, True)
         self.spx_gru = nn.Sequential(nn.ConvTranspose2d(2 * 32, 9, kernel_size=4, stride=2, padding=1), )
-        # self.depth_proj_4=nn.Sequential(BasicConv_IN(1, 32,
-        #                                  kernel_size=3, stride=2, padding=1),
-        #                                  nn.Conv2d(32, 32*2, 3, 1, 1, bias=False),)
-        # self.depth_proj_4_gru=nn.Sequential(BasicConv_IN(1, 32,
-        #                                  kernel_size=3, stride=2, padding=1),
-        #                                 nn.Conv2d(32, 32 * 2, 3, 1, 1, bias=False),)
-        # self.cal_weights = nn.Sequential(
-        #     nn.ConvTranspose2d(32*2, 32,  kernel_size=4, stride=2, padding=1, bias=False),
-        #     nn.GroupNorm(8, 32), nn.ReLU(inplace=True),
-        #     nn.ConvTranspose2d(32, 2,  kernel_size=3,stride=2,  padding=1, bias=False)
-        # )
-        # self.cal_weights = nn.Sequential(
-        #     nn.Conv2d(4, 32,  kernel_size=3, padding=1, bias=False),
-        #     nn.GroupNorm(8, 32), nn.ReLU(inplace=True),
-        #     nn.Conv2d(32, 2,  kernel_size=3, padding=1, bias=False)
-        # )
 
         self.spx = nn.Sequential(nn.ConvTranspose2d(2 * 32, 9, kernel_size=4, stride=2, padding=1), )
         self.spx_2 = Conv2x_IN(24, 32, True)
@@ -187,8 +144,6 @@ class AirDC(nn.Module):
                 # Multi-hypothesis uncertainty for the update module.
                 self.head_update = nn.Sequential(
                     nn.Conv2d(total_ch+32*2+1, self.num_hypo, 3, padding=1),
-                    # nn.ReLU(),
-                    # nn.Conv2d(self.num_hypo,self.num_hypo, 3, padding=1),
                     nn.Sigmoid()
                 )
                 # Pixel-wise uncertainty for step-size control.
@@ -198,12 +153,6 @@ class AirDC(nn.Module):
                     nn.Conv2d(16, 1, 3, padding=1),
                     nn.Sigmoid()
                 )
-            # if self.args.attention_active:
-                # self.fuse_feat=FusionWithAttention(in_planes=args.corr_levels * (2 * args.corr_radius + 1) * (8+1+(1 if 'depth' in args.geo_fn_mode else 0)))
-                # self.geo_att = AttentionModule(in_planes=args.corr_levels * (2 * args.corr_radius + 1) * 8)
-                # self.corr_att = AttentionModule(in_planes=args.corr_levels * (2 * args.corr_radius + 1) * 1)
-                # if ('depth' in self.args.geo_fn_mode):
-                #     self.depth_att = AttentionModule(in_planes=args.corr_levels * (2 * args.corr_radius + 1) * 1)
 
             if self.args.update_with == "igev" :
                 self.ihcfr_context_projections = nn.ModuleList([nn.Conv2d(context_dims[i],
@@ -224,13 +173,6 @@ class AirDC(nn.Module):
                                                         for i in range(args.n_gru_layers)])
                 self.ihcfr = BasicMultiUpdateBlockPLUSPLUS(args, hidden_dims=gru_hidden_dims,
                                                                   encoder_output_dim=self.hidden_dim,geo_planes=self.geoplanes)
-        # self.depth_conv_out = nn.Sequential(nn.Conv2d(2, 32, 3, padding=1),
-        #                                      nn.GroupNorm(16,32),nn.ReLU(),
-        #                                      nn.Conv2d(32, 32, 3, padding=1),
-        #                                      nn.GroupNorm(8,32),nn.ReLU(),
-        #                                      nn.Conv2d(32, 1, 3, padding=1),
-        #                                     )
-        # self.geofeature = GeometryFeature()
 
         # Initialize learnable weights.
         for m in self.modules():
@@ -378,7 +320,6 @@ class AirDC(nn.Module):
         # Construct depth planes for batched sampling.
         step = z_max / D_max
         depths = (torch.arange(D_max, device=device, dtype=dtype).view(1, D_max, 1, 1)+0.5) * step
-        # disp: (B, D_max, 1, 1)
         disp = baseline.view(B, 1, 1, 1) * f.view(B, 1, 1, 1) / (depths * down_factor + 1e-4)
 
         # 2) Construct the sampling grid (B, 1, H, W)
@@ -389,13 +330,13 @@ class AirDC(nn.Module):
         xs_shift = xs.to(dtype) - disp  # -> (B, D_max, H, W)
         ys_shift = ys  # (B, D_max, H, W)
 
-        # —— 4) Normalize coordinates to the grid_sample range [-1, 1]. ——#
+        # Normalize coordinates to the grid_sample range [-1, 1].
         # Normalize coordinates with x_norm = x / (W - 1) * 2 - 1.
         x_norm = xs_shift / (W - 1) * 2.0 - 1.0
         y_norm = ys_shift / (H - 1) * 2.0 - 1.0
         # Create (B, D_max, H, W, 2)
         grid = torch.stack((x_norm, y_norm), dim=-1)
-        # —— 5) Sample right-view features with bilinear interpolation. ——#
+        # Sample right-view features with bilinear interpolation.
         # Merge batch and depth dimensions before sampling.
         feat = right_rgb_feat.unsqueeze(1).expand(-1, D_max, -1, -1, -1)  # (B, D_max, C, H, W)
         feat = feat.reshape(B * D_max, C, H, W)  # (B*D_max, C, H, W)
@@ -413,35 +354,10 @@ class AirDC(nn.Module):
         # Reshape back to (B, C, D_max, H, W)
         sampled = sampled.view(B, D_max, C, H, W).permute(0, 2, 3 ,4 ,1).contiguous()
 
-        # —— 6) Store sampled features in the right-view volume channels. ——#
+        # Store sampled features in the right-view volume channels.
         volume[:, C:2*C] = sampled
 
-
-        # xs_int_map = xs_shift.long()  # -> LongTensor (B, D_max, H, W)
-        #
-        # # 4) Mask and flatten indices.
-        # mask = (xs_int_map >= 0) & (xs_int_map < W)  # (B,D,H,W)
-        # b_idx = torch.arange(B, device=device)[:, None, None, None].expand(B, D_max, H, W)
-        # d_idx = torch.arange(D_max, device=device)[None, :, None, None].expand(B, D_max, H, W)
-        # h_idx = ys.long().expand(B, D_max, H, W)
-        # w_dst_idx = xs.expand(B, D_max, H, W)
-        # w_src_idx = xs_int_map
-        #
-        # b_flat = b_idx[mask]
-        # d_flat = d_idx[mask]
-        # h_flat = h_idx[mask]
-        # w_dst_flat = w_dst_idx[mask]
-        # w_src_flat = w_src_idx[mask]
-        #
-        # # 5) Assign right-view features to the volume(B, 2C, D_max, H, W)
-        # volume[b_flat,  # batch
-        #         C:2 * C,  # right-view channels
-        #         h_flat,  # height index
-        #         w_dst_flat,# target column
-        #         d_flat,  # depth plane
-        #         ] = right_rgb_feat[b_flat, :,h_flat,  w_src_flat  # source column
-        #                         ]
-        # ============ Populate the sparse-depth channel. ============
+        # Populate the sparse-depth channel.
         # Downsample sparse pixel coordinates.
         uv = (d_index.clone() / down_factor).long()  # (B, N, 2)
         h_idx = uv[..., 0].clamp(0, H - 1)  # Clamp to [0, H - 1].
@@ -524,9 +440,7 @@ class AirDC(nn.Module):
         d_down_index = torch.floor(d_index.clone() / self.args.down_factor).long()  # (B, N, 2) H,W
         d_down_depth = torch.floor(points_d[:, :, 2].to(dtype) / self.args.z_max *  D_all).to(dtype)
         d_down_batch = torch.arange(B).unsqueeze(1).expand(-1, d_down_index.shape[1]).to(device)
-        # volume = torch.zeros(
         #     (B, self.in_hg_channels, H // self.args.down_factor, W // self.args.down_factor,  D_all), device=device,
-        #     dtype=dtype)
         volume = left_rgb_feat.new_zeros((B, self.in_hg_channels, h_down_img, w_down_img, D_all), device=device, dtype=dtype)
         if('d' in self.args.get("volume_source","rgbd")):
             if self.args.depth_fusion=="hard_code":
@@ -599,11 +513,9 @@ class AirDC(nn.Module):
         device = left_norm.device
         depth = batch['d']  # (B,1,H,W)
         P = batch['P']
-        # C = self.embed_channels
         B, _, h_img, w_img = left_norm.shape
         d_index = batch['d_index'].long().to(device) if isinstance(batch['d_index'], torch.Tensor) else torch.tensor(batch['d_index']).long().to(device)  # (B, N, 2)
         points_d = batch['points_d'].to(device) if isinstance(batch['points_d'], torch.Tensor) else torch.tensor(batch['points_d']).to(device)  # (B, N, 3)
-        # valid_sparse_mask = (depth > 0.0).float()
         if self.timer:
             self.timer.reset_timings()
         if (split!="test_completion"):
@@ -634,14 +546,11 @@ class AirDC(nn.Module):
                 if self.args.noise_type == "gaussian":
                     # Assume left_norm and right_norm are normalized to [0, 1].
                     # Noise standard deviation: self.args.noise_std.
-                    # torch.randn_like samples from a standard normal distribution.
                     noise_left = torch.randn_like(left_norm) * self.args.noise_std
                     noise_right = torch.randn_like(right_norm) * self.args.noise_std
                     left_norm = left_norm + noise_left
                     right_norm = right_norm + noise_right
                     # Clamp the images to [0, 1] if bounded intensities are required.
-                    # left_norm = torch.clamp(left_norm, 0.0, 1.0)
-                    # right_norm = torch.clamp(right_norm, 0.0, 1.0)
 
                 elif self.args.noise_type == "salt_pepper":
                     # Salt-and-pepper noise sets pixels to 0 or 1 with probability p.
@@ -709,7 +618,6 @@ class AirDC(nn.Module):
                                              self.args.baseline, f=P[:, 0, 0],
                                              down_factor=self.args.down_factor,
                                              z_max=self.args.z_max, D_max=D_all)
-                # volume=volume_all
                 # 25mcorresponds to D=50 with interval=0.5m
                 agg_depth_near0, geo_encoding_volume_near0 = self.agg_near0(volume_near0,
                                                                             h_down_img, w_down_img,
@@ -726,27 +634,14 @@ class AirDC(nn.Module):
                                                                        max_depth=self.args.z_max,
                                                                        interval=D_all / (self.args.z_max) * 4)
 
-                # depth_feature = self.disp_conv(torch.cat([agg_depth_near0,
                 #                                                   init_depth_all], dim=1))
-                # depth_upconv_feat = self.depth_upconv(depth_pyramid[0])
-                # selective_weights = torch.sigmoid(self.selective_conv(torch.cat([left_rgb_feat,
-                #                                                    depth_upconv_feat,
-                #                                                    depth_feature], dim=1)))
 
                 init_depth = init_depth_all
 
             else:
                 # # Enable this block with vis_project for shift visualization.
-                # left_rgb_feat = F.interpolate(left_norm, size=left_rgb_feat.shape[-2:], mode='bilinear', align_corners=True)
-                # right_rgb_feat = F.interpolate(right_norm, size=right_rgb_feat.shape[-2:], mode='bilinear', align_corners=True)
-                # C=3
-                # self.in_hg_channels=2*C+1
                 D_all=self.args.D
                 # New volume construction uses get_volume.
-                # volume = self.get_volume(points_d, d_index, mask_d, left_rgb_feat, right_rgb_feat,
-                #                              self.args.baseline, f=P[:, 0, 0],
-                #                              down_factor=self.args.down_factor,
-                #                              z_max=self.args.z_max, D_max=D_all)
                 # Legacy volume construction uses get_volume_original and may introduce small coordinate-rounding shifts.
                 volume=self.get_volume_original(left_rgb_feat,
                                                        right_rgb_feat,
@@ -770,28 +665,18 @@ class AirDC(nn.Module):
                         dim=1)
 
                 init_depth = depth_regression(prob, max_depth=self.args.z_max, interval=1)
-                # prob = F.softmax(out1.squeeze(dim=1),dim=1)
-                # init_depth = depth_regression(prob,max_depth=self.args.z_max,interval=self.args.z_max/D_all)
 
                 # del prob, volume
             depth_pred_up_iter = []
             disp_pred_up_iter = []
             xspx = self.spx_4(features_left[0])
             xspx = self.spx_2(xspx, stem_2x)
-            # depth_feat_4 = self.depth_proj_4(depth)
-            # weights = self.cal_sparse_weight(xspx+depth_feat_4)
-            # weights = F.softmax(self.cal_weights(torch.cat([left_norm, depth], dim=1)),1)
-            # weights = torch.sigmoid(self.cal_weights(features_left_d), dim=1)
             spx_pred = self.spx(xspx)
             spx_pred = F.softmax(spx_pred, 1)
             if not "i" in self.args.train_strategy:  # Non-iterative inference.
                 depth_pred_up = context_upsample(init_depth,
                                                  spx_pred.float()).unsqueeze(1)
-                # depth_pred_up = self.depth_conv_out(torch.cat([depth_pred_up,depth],dim=1))
                 depth_pred_up_iter.append(depth_pred_up)
-                # depth_predictions_down.append(init_depth)
-                # depth_pred_up=F.interpolate(init_depth,(h_img,w_img),mode='bilinear',align_corners=False)
-                # depth_pred_up_iter.append(depth_pred_up)
                 if 'disp' in self.args.loss_source:
                     disp_pred_up_iter.append(
                         (self.baseline * P[:, 0, 0]).reshape(-1, 1, 1, 1) / (depth_pred_up + 1e-6))
@@ -802,7 +687,6 @@ class AirDC(nn.Module):
                           dtype=torch.float16 if self.args.mixed_precision else torch.float32):
                 if not self.args.update_with == "igevplusplus":
                     depth_pred_up = context_upsample(init_depth, spx_pred.float()).unsqueeze(1)
-                    # depth_pred_up = self.depth_conv_out(torch.cat([depth_pred_up, depth], dim=1))
                     depth_pred_up_iter.append(depth_pred_up)
                 if self.args.update_mode == "rgbd":
                     if self.args.convolutional_layer_encoding != 'std':
@@ -810,7 +694,6 @@ class AirDC(nn.Module):
                             depth_geo_feat = self.cal_geo_feat(P, batch["position"], depth)
                         cnet_list = self.context_extractor(left_norm, depth=depth, depth_geo_feat=depth_geo_feat)
                     # elif self.args.update_with == "selective" and self.args.attention_active:
-                    #     cnet_list= self.backbone(rgb=left_norm, depth=depth)
                     else:
                         cnet_list = self.context_extractor(left_norm, depth=depth)
 
@@ -823,8 +706,6 @@ class AirDC(nn.Module):
                     inp_list = [self.ihcfr_channel_attention(x) * x for x in inp_list]
                     att = [self.ihcfr_spatial_attention(x) for x in inp_list]
 
-                    # inp_list = [self.ihcfr_channel_attention(x,depth_pyramid[0]) * x for x in inp_list]
-                    # att = [self.ihcfr_spatial_attention(x,depth_pyramid[0]) for x in inp_list]
                 elif self.args.update_with == "igev" or self.args.update_with == "igevplusplus":
                     inp_list = [list(conv(i).split(split_size=conv.out_channels // 3, dim=1)) for i, conv in
                                 zip(inp_list, self.ihcfr_context_projections)]
@@ -865,41 +746,21 @@ class AirDC(nn.Module):
                             geo_feat = torch.cat((geo_feat_all, corr_feat, depth_feat), dim=1)
                         else:
                             geo_feat = torch.cat((geo_feat_all, corr_feat), dim=1)
-                        # geo_feat_all=self.geo_feat_proj(geo_feat_all)
-                        # corr_feat = self.corr_proj(corr_feat)
-                        # depth_feat = self.depth_proj(depth_feat)
-                        # depth_attention_map = self.depth_attention_module(left_rgb_feat,curr_depth/D_all)  # (B, 1, H, W)
                         # # Apply depth attention to generated features.
-                        # geo_feat_all = geo_feat_all * depth_attention_map[:,0].unsqueeze(1)
-                        # corr_feat = corr_feat * depth_attention_map[:,1].unsqueeze(1)
-                        # depth_feat = depth_feat * depth_attention_map[:,2].unsqueeze(1)
                         # # Fuse features with selective weighting.
-                        # geo_feat =geo_feat_all+corr_feat+depth_feat
-                        # geo_feat = torch.cat([geo_feat_all, corr_feat, depth_feat], dim=1)
 
-                        # geo_feature = self.feat_conv(torch.cat([geo_feat_all, corr_feat, depth_feat], dim=1))
-                        # depth_upconv_feat = self.depth_upconv(depth_pyramid[0])
-                        # selective_weights = torch.sigmoid(self.selective_conv(torch.cat([left_rgb_feat,
-                        #                                                    depth_upconv_feat,
-                        #                                                    geo_feature], dim=1)))
-                        # geo_feat = torch.cat([selective_weights[:, 0:1]*geo_feat_all,
                         #                        selective_weights[:, 1:2]*corr_feat,
                         #                        selective_weights[:, 2:3]*depth_feat], dim=1)
-                        # geo_feat=(selective_weights[:, 0:1]*geo_feat_all+\
                         #           selective_weights[:, 1:2]*corr_feat+\
                         #           selective_weights[:, 2:3]*depth_feat)
-                       # geo_feat=self.fuse_feat(geo_feat_all, corr_feat,depth_feat)
 
                     else:
                          geo_feat = geo_fn(curr_depth, coords, curr_f, curr_steps,D_all)
 
-                # else:
-                # curr_steps= base_steps
                 if getattr(self.args, "steps_decay", True):
                     curr_steps = base_steps * (self.decay ** itr)  # Decay the search range by iteration.
                 else:
                     curr_steps = base_steps
-                # geo_feat = geo_fn(curr_depth, coords, curr_f,curr_steps)
 
                 with (autocast(enabled=self.args.mixed_precision,
                               dtype=torch.float16 if self.args.mixed_precision else torch.float32)):
@@ -938,12 +799,8 @@ class AirDC(nn.Module):
                     # Compute mapping parameters.
                     start = 1 - curr_steps * self.args.corr_radius
                     end = 1 + curr_steps * self.args.corr_radius
-                    # span = end - start
-                    # # Linear mapping.
-                    # alpha = start + (pred_del + 1) / 2 * span
-                    # curr_depth=alpha*curr_depth
                     clamp_min=-self.args.corr_radius; clamp_max=self.args.corr_radius
-                    clamped_pred = torch.clamp(pred_del, min=clamp_min, max=clamp_max)  # p ∈ [−4, +4]
+                    clamped_pred = torch.clamp(pred_del, min=clamp_min, max=clamp_max)  # Clamp the update logits.
                     alpha = start + ( (clamped_pred - clamp_min) / (clamp_max - clamp_min+1e-6) ) * (end - start)
                     curr_depth = alpha * curr_depth
 
@@ -979,11 +836,8 @@ class AirDC(nn.Module):
                     # Apply the constrained update.
                     curr_depth = torch.exp(log_depth + delta_log)
 
-                # if split == 'train' or (split != 'train' and itr == self.args.num_iters - 1):
                 depth_pred_up = self.upsample_depth(curr_depth, mask_feat_4.float(),
                                                     stem_2x)
-                # depth_pred_up=self.depth_conv_out(torch.cat([depth_pred_up,depth],dim=1))
-                # depth_pred_up = F.interpolate(curr_disp*4.,scale_factor=4,mode='bilinear',align_corners=False)
                 if torch.isnan(depth_pred_up).any():
                     print("nan in depth_pred_up")
                 depth_pred_up_iter.append(depth_pred_up)

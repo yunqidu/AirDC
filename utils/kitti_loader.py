@@ -31,17 +31,10 @@ class AddCoordsNp():
         """
         input_tensor: (batch, x_dim, y_dim, c)
         """
-        # batch_size_tensor = np.shape(input_tensor)[0]
-
         xx_ones = np.ones([self.x_dim], dtype=np.int32)
         xx_ones = np.expand_dims(xx_ones, 1)
 
-        # print(xx_ones.shape)
-
         xx_range = np.expand_dims(np.arange(self.y_dim), 0)
-        # xx_range = np.expand_dims(xx_range, 1)
-
-        # print(xx_range.shape)
 
         xx_channel = np.matmul(xx_ones, xx_range)
         xx_channel = np.expand_dims(xx_channel, -1)
@@ -49,12 +42,7 @@ class AddCoordsNp():
         yy_ones = np.ones([self.y_dim], dtype=np.int32)
         yy_ones = np.expand_dims(yy_ones, 0)
 
-        # print(yy_ones.shape)
-
         yy_range = np.expand_dims(np.arange(self.x_dim), 1)
-        # yy_range = np.expand_dims(yy_range, -1)
-
-        # print(yy_range.shape)
 
         yy_channel = np.matmul(yy_range, yy_ones)
         yy_channel = np.expand_dims(yy_channel, -1)
@@ -64,9 +52,6 @@ class AddCoordsNp():
 
         xx_channel = xx_channel * 2 - 1
         yy_channel = yy_channel * 2 - 1
-
-        # xx_channel = xx_channel.repeat(batch_size_tensor, axis=0)
-        # yy_channel = yy_channel.repeat(batch_size_tensor, axis=0)
 
         ret = np.concatenate([xx_channel, yy_channel], axis=-1)
 
@@ -187,29 +172,21 @@ def apply_crop(data,crop_info):
 def train_transform(args,rgb=None, rgb_left=None, rgb_right=None,
                     sparse=None, target=None,position=None,crop_width=512,crop_height=256,
                     lidar_lines=64,P=None):
-    # s = np.random.uniform(1.0, 1.5) # random scaling
-    # angle = np.random.uniform(-5.0, 5.0) # random rotation degrees
-
     do_flip = np.random.uniform(0.0, 1.0) < 0.5  # random horizontal flip
     if args.crop_type == 'random':
         transforms_list = [
-            # transforms.Rotate(angle),
-            # transforms.Resize(s),
             transforms.RandomCrop((crop_height, crop_width))
         ]
     elif args.crop_type == 'bottom':
         transforms_list = [
-            # transforms.Rotate(angle),
-            # transforms.Resize(s),
             transforms.BottomCrop((crop_height, crop_width))
         ]
-    #Random crop.
+    # Apply the configured spatial crop.
     transform_crop = transforms.Compose(transforms_list)
-    # transform_flip = transforms.Compose([transforms.HorizontalFlip(do_flip)])
     target,crop_info = transform_crop(target)
     sparse = apply_crop(sparse,crop_info)
 
-    #64-line crop.
+    # Simulate lower-line LiDAR sampling when requested.
     keep_ratio = (lidar_lines / 64.0)
     assert keep_ratio >= 0 and keep_ratio <= 1.0, "keep_ratio should be in [0,1]"
     if (keep_ratio < 1.0):
@@ -222,8 +199,6 @@ def train_transform(args,rgb=None, rgb_left=None, rgb_right=None,
             keep_ratio=keep_ratio
         )
 
-    # sparse = transform_flip(sparse)
-    # target = transform_flip(target)
     brightness = np.random.uniform(max(0, 1 - jitter),
                                    1 + jitter)
     contrast = np.random.uniform(max(0, 1 - jitter), 1 + jitter)
@@ -235,23 +210,17 @@ def train_transform(args,rgb=None, rgb_left=None, rgb_right=None,
     if rgb_left is not None:
         rgb_left = transform_rgb(rgb_left)
         rgb_left=apply_crop(rgb_left,crop_info)
-        # rgb_left = transform_flip(rgb_left)
         rgb_left = normalize_rgb(rgb_left, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     if rgb_right is not None:
         rgb_right = transform_rgb(rgb_right)
         rgb_right=apply_crop(rgb_right,crop_info)
-        # rgb_right = transform_flip(rgb_right)
         rgb_right = normalize_rgb(rgb_right, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     if rgb is not None:
         rgb = transform_rgb(rgb)
         rgb=apply_crop(rgb,crop_info)
-        # rgb = transform_flip(rgb)
         rgb_norm = normalize_rgb(rgb, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     if position is not None:
         position = apply_crop(position,crop_info)
-
-    # sparse = drop_depth_measurements(sparse, 0.9)
-
 
     if rgb_right is not None:
         return {
@@ -441,7 +410,6 @@ class KittiDepth(data.Dataset):
         self.paths = paths
         self.transform = transform
         self.threshold_translation = 0.1
-        # self.K = load_calib()
         self.calib_params = load_all_calib(args.calib_folder)
 
 
@@ -483,20 +451,9 @@ class KittiDepth(data.Dataset):
                 paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
 
         elif split == "val":
-            # transform = val_transform
-            # glob_d = os.path.join(self.data_folder, 'data_depth_velodyne/val/*_sync/proj_depth/velodyne_raw/image_0[2,3]/*.png')
-            # glob_gt = os.path.join(self.data_folder, 'data_depth_annotated/val/*_sync/proj_depth/groundtruth/image_0[2,3]/*.png')
-            #
-            # if glob_gt is not None:
-            #     paths_d = sorted(glob.glob(glob_d))
-            #     paths_gt = sorted(glob.glob(glob_gt))
-            #     paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
-            #select:1000
             transform = val_transform
             if self.howtoval=="full":
                 if self.return_left_right:
-                    # glob_d = os.path.join(self.data_folder,
-                    #                       'data_depth_velodyne/val/*_sync/proj_depth/velodyne_raw/image_02/*.png')
                     glob_gt = os.path.join(self.data_folder,
                                            'data_depth_annotated/val/*_sync/proj_depth/groundtruth/image_02/*.png')
                 else:
@@ -505,8 +462,7 @@ class KittiDepth(data.Dataset):
                     glob_gt = os.path.join(self.data_folder,
                                            'data_depth_annotated/val/*_sync/proj_depth/groundtruth/image_0[2,3]/*.png')
                 if glob_gt is not None:
-                    paths_gt = sorted(glob.glob(glob_gt))  # [:10]
-                    # paths_d = sorted(glob.glob(glob_d))  # [:10]
+                    paths_gt = sorted(glob.glob(glob_gt))
                     paths_d=[path.replace("groundtruth","velodyne_raw").replace("data_depth_annotated","data_depth_velodyne") for path in paths_gt]
                     paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
             elif self.howtoval=="select":
@@ -516,9 +472,9 @@ class KittiDepth(data.Dataset):
                 glob_rgb = os.path.join(self.data_folder, "data_depth_selection/val_selection_cropped/image/*.png")
 
                 if glob_gt is not None:
-                    paths_d = sorted(glob.glob(glob_d))  # [:10]
-                    paths_gt = sorted(glob.glob(glob_gt))  # [:10]
-                    paths_rgb = sorted(glob.glob(glob_rgb))  # [:10]
+                    paths_d = sorted(glob.glob(glob_d))
+                    paths_gt = sorted(glob.glob(glob_gt))
+                    paths_rgb = sorted(glob.glob(glob_rgb))
         elif split == "test_completion":
             transform = test_transform
             glob_d = os.path.join(
@@ -530,16 +486,16 @@ class KittiDepth(data.Dataset):
                 self.data_folder,
                 "data_depth_selection/test_depth_completion_anonymous/image/*.png")
             if glob_gt is not None:
-                paths_d = sorted(glob.glob(glob_d))  # [:10]
-                paths_gt = sorted(glob.glob(glob_gt))  # [:10]
+                paths_d = sorted(glob.glob(glob_d))
+                paths_gt = sorted(glob.glob(glob_gt))
                 paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
             else:
-                # test only has d or rgb
+                # Test split does not provide ground-truth depth.
                 paths_rgb = sorted(glob.glob(glob_rgb))
                 paths_gt = [None] * len(paths_rgb)
                 if split == "test_prediction":
                     paths_d = [None] * len(
-                        paths_rgb)  # test_prediction has no sparse depth
+                        paths_rgb)  # Depth prediction test split has no sparse depth.
                 else:
                     paths_d = sorted(glob.glob(glob_d))
         elif split == "test_prediction":
@@ -550,36 +506,26 @@ class KittiDepth(data.Dataset):
                 self.data_folder,
                 "data_depth_selection/test_depth_prediction_anonymous/image/*.png")
             if glob_gt is not None:
-                paths_d = sorted(glob.glob(glob_d))  # [:10]
-                paths_gt = sorted(glob.glob(glob_gt))  # [:10]
+                paths_d = sorted(glob.glob(glob_d))
+                paths_gt = sorted(glob.glob(glob_gt))
                 paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
             else:
-                # test only has d or rgb
+                # Test split does not provide ground-truth depth.
                 paths_rgb = sorted(glob.glob(glob_rgb))
                 paths_gt = [None] * len(paths_rgb)
                 if split == "test_prediction":
                     paths_d = [None] * len(
-                        paths_rgb)  # test_prediction has no sparse depth
+                        paths_rgb)  # Depth prediction test split has no sparse depth.
                 else:
                     paths_d = sorted(glob.glob(glob_d))
         else:
             raise ValueError("Unrecognized split " + str(split))
-        # print("Length of paths_rgb, paths_d, paths_gt ",len(paths_rgb), len(paths_d), len(paths_gt))
-
         if len(paths_rgb) != len(paths_d) or len(paths_rgb) != len(paths_gt):
             print("Length of paths_rgb, paths_d, paths_gt not equal!",len(paths_rgb), len(paths_d), len(paths_gt))
         if self.return_left_right:
-            # Now, we split paths_rgb into left and right based on file names.
+            # Split stereo image paths by camera suffix.
             paths_left = paths_rgb
             paths_right = [path.replace('image_02', 'image_03') for path in paths_left]
-            # if self.split == "train":
-            #     paths = {
-            #         "left_rgb": paths_left[:50],
-            #         "right_rgb": paths_right[:50],
-            #         "d": paths_d[:50],
-            #         "gt": paths_gt[:50],
-            #     }
-            # else:
             paths = {
                 "left_rgb": paths_left,
                 "right_rgb": paths_right,
@@ -587,19 +533,7 @@ class KittiDepth(data.Dataset):
                 "gt": paths_gt,
             }
         else:
-            # if self.split == "train":
-            #     paths = {"rgb": paths_rgb[:10], "d": paths_d[:10], "gt": paths_gt[:10]}
-            # else:
-            # paths_d = [
-            # paths_gt = [
-
             paths = {"rgb": paths_rgb, "d": paths_d, "gt": paths_gt}
-
-        # if split == "train":
-        #     paths = self.sample_paths(paths, 50)
-        #
-        # if split == "val":
-        #     paths = self.sample_paths(paths, 10)
 
         return paths, transform
 
@@ -637,15 +571,12 @@ class KittiDepth(data.Dataset):
 
             calib_left = self.calib_params[date][2]
             calib_right = self.calib_params[date][3]
-            # rgb_png = np.array(img_file, dtype=float) / 255.0 # scale pixels to the range [0,1]
             left_rgb = np.array(Image.open(left_rgb_path), dtype='uint8')
             right_rgb = np.array(Image.open(right_rgb_path), dtype='uint8')
 
             depth_path = self.paths['d'][index]
             gt_path = self.paths['gt'][index]
             K_left = calib_left['K']
-            # T = calib_left['RT'][:3, 3]
-            # P = calib_left['P']
             K_right = calib_right['K']
             R_right = calib_right['R']
             T_right = calib_right['T']
@@ -660,7 +591,6 @@ class KittiDepth(data.Dataset):
                 date = rgb_path.split('/')[5]
                 camera_index = int(rgb_path.split('image_0')[1][0])
             calib = self.calib_params[date][camera_index]
-            # rgb_png = np.array(img_file, dtype=float) / 255.0 # scale pixels to the range [0,1]
             rgb = np.array(Image.open(rgb_path), dtype='uint8')
 
             depth_path = self.paths['d'][index]
@@ -669,13 +599,12 @@ class KittiDepth(data.Dataset):
             T = calib['RT'][:3, 3]
             P = calib['P']
 
-        # (375, 1242, 3) HWC->CHW (3,375, 1242)
+        # Read KITTI depth maps from 16-bit PNG files.
         depth_pj_png = np.array(Image.open(depth_path), dtype='int')
-        # complete_depth_png = np.array(Image.open(self.paths['cd'][index]), dtype='int')
         target_png = np.array(Image.open(gt_path), dtype='int')
 
         assert np.max(depth_pj_png) > 255 and np.max(depth_pj_png), "np.max(depth_pj_png)={}".format(
-            np.max(depth_pj_png))  # make sure we have a proper 16bit depth map here.. not 8bit!
+            np.max(depth_pj_png))  # Validate the expected 16-bit depth encoding.
 
 
         sparse = depth_pj_png.astype(float) / 256
@@ -769,10 +698,6 @@ class KittiDepth(data.Dataset):
                                'crop_top': return_dict['crop_info']['crop_top'],
                                'crop_left': return_dict['crop_info']['crop_left'],
                                'position':return_dict['position'],
-                               # 'K_left': K_left,
-                               # 'K_right': K_right,
-                               # 'R_right': R_right,
-                               # 'T_right': T_right,
                                'P': P,
                                })
             if 'P_crop' in return_dict.keys():
@@ -792,14 +717,6 @@ class KittiDepth(data.Dataset):
             for key, val in candidates.items()
         }
         return items
-
-        # print(index,rgb.shape)
-        # path=self.paths['rgb'][index]
-        # print(path)s
-        # items = {
-        #     key: to_float_tensor(val)
-        #     for key, val in candidates.items() if val is not None
-        # }
 
     def __len__(self):
         return len(self.paths['d'])

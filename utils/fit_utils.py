@@ -131,7 +131,6 @@ def parse_my_args():
                     pass
             config_dict[key] = value
 
-    # if rank == 0:
     print(f"✅ Config loaded from {config_path}")
 
     config = Config(**config_dict)
@@ -213,7 +212,6 @@ def get_module_path(module):
     return os.path.abspath(inspect.getfile(module))
 
 def print_on_master(ep, epochs, batch_idx, total, start_time, lr):
-    # if dist.get_rank() == 0:
     elapsed_time = time.time() - start_time
     elapsed_str = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
     if batch_idx > 0:
@@ -264,7 +262,6 @@ def load_checkpoint(ckpt_path, model, optimizer, scheduler):
         epoch = ckpt["epoch"]
         batch_idx = ckpt.get("batch_idx", 0)  # Get batch_idx with a default value of 0.
         best_val_loss = ckpt.get("loss", float('inf'))
-        # if dist.get_rank() == 0:
         print(f"Loaded checkpoint from {ckpt_path}, starting from epoch {epoch}, batch {batch_idx}")
         return epoch, batch_idx, best_val_loss
     return 0, 0, float('inf')
@@ -406,7 +403,6 @@ def custom_collate_fn_with_batch(batch):
                 collated_batch[key] = [item[key] for item in batch]  # Keep the field unchanged without tensor conversion.
             else:
             # Stack tensors directly or convert values to tensors before stacking.
-            #     print(key)
                 collated_batch[key] = torch.stack([
                     # Clone and detach tensor values.
                     item[key].clone().detach() if isinstance(item[key], torch.Tensor) else
@@ -516,8 +512,6 @@ def check_shape(rank,name, own_state, param,failed_params):
         if own_state[name].shape != param.shape:
             raise RuntimeError(f"Shape mismatch: expected {own_state[name].shape}, got {param.shape}")
         own_state[name].copy_(param)
-        # if dist.get_rank() == 0:
-        #     print(f"√ Successfully loaded: {name}")
     except RuntimeError as e:
         if rank == 0:
             err_msg = str(e)
@@ -791,8 +785,6 @@ def set_seed(seed, rank=0):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)  # Multi-GPU execution.
-    # torch.backends.cudnn.deterministic = True  # Deterministic convolution algorithms.
-    # torch.backends.cudnn.benchmark = True     # Disable benchmarking for deterministic behavior.
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 def worker_init_fn(worker_id):

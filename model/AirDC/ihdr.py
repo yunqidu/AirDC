@@ -24,8 +24,6 @@ class DepthRegressionHead(nn.Module):
             nn.Conv2d(in_channels, embed_dim, 3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(embed_dim, 1, 3, padding=1),
-            # nn.Sigmoid()  # Output range(0,1)
-            # nn.Tanh()  # Output range(-1,1)
         )
 
     def forward(self, x):
@@ -83,7 +81,6 @@ def interp(x, dest):
     else:
         output = output_fp32
     return output
-# from .submodule3 import AttentionModule
 class MMGIG(nn.Module):
     def __init__(self, args,hidden_dim=128,geo_planes=3):
         super(MMGIG, self).__init__()
@@ -223,7 +220,6 @@ class BasicMultiUpdateBlockPLUSPLUS(nn.Module):
             self.disp_head = DepthClassify(hidden_dims[2], hidden_dim=self.encoder_output_dim*2, output_dim=2*args.corr_radius+1)
         elif args.predict_head=='log_regression':
             self.log_delta_head = DepthRegressionLogHead(hidden_dims[2])
-        # factor = 2**self.args.n_downsample
 
         self.mask_feat_4 = nn.Sequential(
             nn.Conv2d(hidden_dims[2], 32, 3, padding=1),
@@ -326,7 +322,6 @@ class RaftConvGRU(nn.Module):
         self.convr = nn.Conv2d(hidden_dim+input_dim, hidden_dim, kernel_size, padding=(kernel_size+(kernel_size-1)*(dilation-1))//2, dilation=dilation)
         self.convq = nn.Conv2d(hidden_dim+input_dim, hidden_dim, kernel_size, padding=(kernel_size+(kernel_size-1)*(dilation-1))//2, dilation=dilation)
         # Adaptive update gate.
-        # self.adaptive_update_gate = nn.Conv2d(hidden_dim + input_dim, 1, kernel_size=1)
 
     def forward(self, h, x):
         hx = torch.cat([h, x], dim=1)
@@ -338,11 +333,7 @@ class RaftConvGRU(nn.Module):
         h = (1-z) * h + z * q
 
         # # Compute the adaptive update gate from input features.
-        # adaptive_gate = torch.sigmoid(self.adaptive_update_gate(hx))
-        #
         # # Update with the adaptive gate.
-        # h = (1 - z) * h + z * q
-        # h = h * adaptive_gate + (1 - adaptive_gate) * h  # Apply the adaptive update gate.
 
         return h
 
@@ -380,7 +371,6 @@ class IHCFR(nn.Module):
         elif args.predict_head=='log_regression':
             self.log_delta_head = DepthRegressionLogHead(hidden_dims[2])
 
-        # factor = 2**self.args.n_downsample
         self.mask_feat_4 = nn.Sequential(
             nn.Conv2d(hidden_dims[2], 32, 3, padding=1),
             nn.ReLU(inplace=True))
@@ -413,6 +403,5 @@ class IHCFR(nn.Module):
             delta_disp = self.log_delta_head(net[0])
 
         # scale mask to balence gradients
-        # mask_feat_4 = .25 * self.mask_feat_4(net[0])
         mask_feat_4 = self.mask_feat_4(net[0])
         return net, mask_feat_4, delta_disp

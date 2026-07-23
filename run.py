@@ -1,11 +1,9 @@
 
 from torch.utils.data.distributed import DistributedSampler
 from torch.cuda.amp import GradScaler
-# work_dir=os.path.join(work_space, "log")
 # sys.path.append(work_dir)
 # sys.path.append(work_space+'model')
 from utils import *
-# torch.backends.cudnn.enabled = True
 import swanlab
 import copy
 
@@ -142,7 +140,6 @@ if split == 'train':
         train_num_samples_to_visualize = max(1, int(config.train_vis_ratio * len(train_loader)))
     elif config.dataset == 'kittidc':
         train_num_samples_to_visualize=4
-        # train_num_samples_to_visualize = max(1, int(0.001 * len(train_loader)))
     elif config.dataset == 'vkitti2':
         train_num_samples_to_visualize = max(1, int(0.05 * len(train_loader)))
     elif config.dataset == 'ms2':
@@ -346,7 +343,6 @@ if __name__ == "__main__":
                     swanlab_train_images.append(image)
                     
                 accumulated_loss += loss
-                # torch.autograd.set_detect_anomaly(True)
                 if (batch_idx + 1) % accumulation_steps  == 0 :
                     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10)
                     scaler.scale(loss).backward()
@@ -583,8 +579,6 @@ if __name__ == "__main__":
                 if config.model_name == 'AirDC':
                     # with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
                     _ = model(batch_data, split="test_completion")
-                    # print(prof.key_averages().table(sort_by="cuda_time_total"))
-                    # print("finish")
                 else:
                     _ = model(batch_data)
                 progress.update()

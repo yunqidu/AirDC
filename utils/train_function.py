@@ -104,7 +104,6 @@ def run_val(config,
     swanlab_vis_indices = sorted(list(val_visualize_indices))[:5]
     swanlab_image_list = []
     
-    # torch.cuda.amp.autocast(enabled=False)
     # with torch.cuda.amp.autocast(dtype=torch.float16, enabled=True if config.model_name=='AirDC' and args.mixed_precision else False):
     import torch
     with (torch.no_grad()):
@@ -185,8 +184,6 @@ def run_val(config,
                 image = swanlab.Image(pred_colored, caption=f"Val Sample {index_v}")
                 swanlab_image_list.append(image)
                 
-                # if rank == 0:
-                #     print(f" val rmse:{val_metrics['RMSE'] / (index_v + 1):.4f}")
         # Log collected images to SwanLab after validation.
         if getattr(config, 'export_to_swanlab', False) and rank == 0 and len(swanlab_image_list) > 0 and not single_val:
             import swanlab

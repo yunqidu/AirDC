@@ -55,14 +55,11 @@ class Hypothesis_guided_Cross_scale_Feature_Fusion:
 
     def __call__(self, depth, coords,curr_f,curr_steps,D_all):
         epsilon = 1e-6
-        # curr_disp = curr_f * self.baseline / (init_depth + epsilon)
         # depth: [b, 1, h, w] current depth estimate with shape [B, 1, H, W].
         # coords: [B, H, W, 1], pixel coordinates for each image location.
         # depth: Current depth map [B,H,W]
         # curr_f: Current focal length.
         # r: Search radius.
-        # self.baseline: Stereo baseline length.
-        # self.steps: Discretized step-size factor.
 
         r = self.args.corr_radius
         b, _, h, w = depth.shape
@@ -82,9 +79,7 @@ class Hypothesis_guided_Cross_scale_Feature_Fusion:
         # Generate candidate depths by broadcasting.
         candidates_depth = depth * alpha.view(1, 1, 1, 2 * r + 1)  # [B,H,W,1] * [1,1,2r+1] -> [B,H,W,2r+1]
         # Compute disparity candidates (B,H,W,2r+1,1)
-        # disp = self.baseline * curr_f.reshape(b, 1, 1, 1, 1) / (depth.unsqueeze(-2) + epsilon)  # Analytical form.
         # Compute horizontal offsets dx (B,H,W,2r+1,1)
-        # dx = self.baseline * curr_f.reshape(b, 1, 1, 1, 1) * (1 - alpha) / (depth.unsqueeze(-2) * (2 - alpha) + epsilon)
         voxel_depth=depth/self.args.z_max * D_all
 
         if self.args.update_with == "igevplusplus":

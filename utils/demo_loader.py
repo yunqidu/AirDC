@@ -89,8 +89,6 @@ def read_single_demo_folder(folder_path, args, device):
         v_valid = v[valid_mask]
         z_valid = sparse_depth[valid_mask]
         
-        # x = (u - cx) * z / fx
-        # y = (v - cy) * z / fy
         x_valid = (u_valid - K_left[0, 2]) * z_valid / K_left[0, 0]
         y_valid = (v_valid - K_left[1, 2]) * z_valid / K_left[1, 1]
         

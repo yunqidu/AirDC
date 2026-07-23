@@ -358,16 +358,8 @@ class MS2Depth(data.Dataset):
                 samp.replace('sync_data', 'proj_depth').replace('img_left', 'depth'))
 
         # Disable this block when all 1272 frames are required.
-        # if split == 'val':
-        #     state = np.random.get_state()
         #     np.random.seed(1000)
-        #     val_idxs = set(np.random.permutation(len(img_left_list))[:300])
         #     np.random.set_state(state)
-        #     
-        #     img_left_list = [img_left_list[i] for i in range(len(img_left_list)) if i in val_idxs]
-        #     img_right_list = [img_right_list[i] for i in range(len(img_right_list)) if i in val_idxs]
-        #     disp_gt_list = [disp_gt_list[i] for i in range(len(disp_gt_list)) if i in val_idxs]
-        #     sparse_hint_list = [sparse_hint_list[i] for i in range(len(sparse_hint_list)) if i in val_idxs]
             
         if split == 'train':
             # Optional debug subset that limits the training set to the first 10 samples.

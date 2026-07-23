@@ -33,17 +33,13 @@ class AddCoordsNp():
         """
         input_tensor: (batch, x_dim, y_dim, c)
         """
-        # batch_size_tensor = np.shape(input_tensor)[0]
 
         xx_ones = np.ones([self.x_dim], dtype=np.int32)
         xx_ones = np.expand_dims(xx_ones, 1)
 
-        # print(xx_ones.shape)
 
         xx_range = np.expand_dims(np.arange(self.y_dim), 0)
-        # xx_range = np.expand_dims(xx_range, 1)
 
-        # print(xx_range.shape)
 
         xx_channel = np.matmul(xx_ones, xx_range)
         xx_channel = np.expand_dims(xx_channel, -1)
@@ -51,12 +47,9 @@ class AddCoordsNp():
         yy_ones = np.ones([self.y_dim], dtype=np.int32)
         yy_ones = np.expand_dims(yy_ones, 0)
 
-        # print(yy_ones.shape)
 
         yy_range = np.expand_dims(np.arange(self.x_dim), 1)
-        # yy_range = np.expand_dims(yy_range, -1)
 
-        # print(yy_range.shape)
 
         yy_channel = np.matmul(yy_range, yy_ones)
         yy_channel = np.expand_dims(yy_channel, -1)
@@ -67,8 +60,6 @@ class AddCoordsNp():
         xx_channel = xx_channel * 2 - 1
         yy_channel = yy_channel * 2 - 1
 
-        # xx_channel = xx_channel.repeat(batch_size_tensor, axis=0)
-        # yy_channel = yy_channel.repeat(batch_size_tensor, axis=0)
 
         ret = np.concatenate([xx_channel, yy_channel], axis=-1)
 
@@ -191,8 +182,6 @@ def apply_crop(data,crop_info):
 def train_transform(args, rgb_left=None, rgb_right=None,
                     sparse=None, target=None,position=None,crop_width=512,crop_height=256,
                     lidar_lines=64,P=None):
-    # s = np.random.uniform(1.0, 1.5) # random scaling
-    # angle = np.random.uniform(-5.0, 5.0) # random rotation degrees
 
     do_flip = np.random.uniform(0.0, 1.0) < 0.5  # random horizontal flip
     if args.crop_type == 'random':
@@ -209,7 +198,6 @@ def train_transform(args, rgb_left=None, rgb_right=None,
         ]
     #Random crop.
     transform_crop = transforms.Compose(transforms_list)
-    # transform_flip = transforms.Compose([transforms.HorizontalFlip(do_flip)])
     target,crop_info = transform_crop(target)
     sparse = apply_crop(sparse,crop_info)
 
@@ -226,8 +214,6 @@ def train_transform(args, rgb_left=None, rgb_right=None,
             keep_ratio=keep_ratio
         )
 
-    # sparse = transform_flip(sparse)
-    # target = transform_flip(target)
     brightness = np.random.uniform(max(0, 1 - jitter),
                                    1 + jitter)
     contrast = np.random.uniform(max(0, 1 - jitter), 1 + jitter)
@@ -239,17 +225,14 @@ def train_transform(args, rgb_left=None, rgb_right=None,
     if rgb_left is not None:
         rgb_left = transform_rgb(rgb_left)
         rgb_left=apply_crop(rgb_left,crop_info)
-        # rgb_left = transform_flip(rgb_left)
         rgb_left = normalize_rgb(rgb_left, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     if rgb_right is not None:
         rgb_right = transform_rgb(rgb_right)
         rgb_right=apply_crop(rgb_right,crop_info)
-        # rgb_right = transform_flip(rgb_right)
         rgb_right = normalize_rgb(rgb_right, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     if position is not None:
         position = apply_crop(position,crop_info)
 
-    # sparse = drop_depth_measurements(sparse, 0.9)
 
 
     if rgb_right is not None:
@@ -389,261 +372,6 @@ def sample_lidar_lines(
     sampled_depth[final_mask] = depth_map[final_mask]
     return sampled_depth
 
-
-# class VirtualKitti(data.Dataset):
-#     """A data loader for the Kitti dataset
-#     """
-#     def __init__(self, args,split, howtoval="select"):
-#         self.args = args
-#         self.split = split
-#         self.howtoval=howtoval
-#         self.data_folder = args.data_folder
-#         paths, transform = self.get_paths_and_transform(split)
-#         self.paths = paths
-#         self.transform = transform
-#         self.threshold_translation = 0.1
-#         # self.K = load_calib()
-#         self.calib_params = load_all_calib(args.calib_folder)
-#
-#
-#     def get_paths_and_transform(self, split):
-#         def get_rgb_paths(p):
-#             parts = p.split('/')
-#             date_drive_id = parts[6]
-#             date = date_drive_id.split('_drive_')[0]
-#             return os.path.join(self.data_folder, 'raw', date, date_drive_id, parts[-2], 'data', parts[-1])
-#
-#         if split == "train":
-#             transform = train_transform
-#
-#             glob_d = os.path.join(self.data_folder,
-#                                   'data_depth_velodyne/train/*_sync/proj_depth/velodyne_raw/image_02/*.png')
-#             glob_gt = os.path.join(self.data_folder, 'data_depth_annotated/train/*_sync/proj_depth/groundtruth/image_02/*.png')
-#             if glob_gt is not None:
-#                 paths_d = sorted(glob.glob(glob_d))
-#                 paths_gt = sorted(glob.glob(glob_gt))
-#                 paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
-#
-#         elif split == "val":
-#             # transform = val_transform
-#             # glob_d = os.path.join(self.data_folder, 'data_depth_velodyne/val/*_sync/proj_depth/velodyne_raw/image_0[2,3]/*.png')
-#             # glob_gt = os.path.join(self.data_folder, 'data_depth_annotated/val/*_sync/proj_depth/groundtruth/image_0[2,3]/*.png')
-#             #
-#             # if glob_gt is not None:
-#             #     paths_d = sorted(glob.glob(glob_d))
-#             #     paths_gt = sorted(glob.glob(glob_gt))
-#             #     paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
-#             #select:1000
-#             transform = val_transform
-#             if self.howtoval=="full":
-#                 glob_d = os.path.join(self.data_folder,
-#                                       'data_depth_velodyne/val/*_sync/proj_depth/velodyne_raw/image_02/*.png')
-#                 glob_gt = os.path.join(self.data_folder,
-#                                        'data_depth_annotated/val/*_sync/proj_depth/groundtruth/image_02/*.png')
-#                 if glob_gt is not None:
-#                     paths_d = sorted(glob.glob(glob_d))  # [:10]
-#                     paths_gt = sorted(glob.glob(glob_gt))  # [:10]
-#                     paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
-#             elif self.howtoval=="select":
-#                 glob_d = os.path.join(self.data_folder, "data_depth_selection/val_selection_cropped/velodyne_raw/*.png")
-#                 glob_gt = os.path.join(self.data_folder,
-#                                        "data_depth_selection/val_selection_cropped/groundtruth_depth/*.png")
-#                 glob_rgb = os.path.join(self.data_folder, "data_depth_selection/val_selection_cropped/image/*.png")
-#
-#                 if glob_gt is not None:
-#                     paths_d = sorted(glob.glob(glob_d))  # [:10]
-#                     paths_gt = sorted(glob.glob(glob_gt))  # [:10]
-#                     paths_rgb = sorted(glob.glob(glob_rgb))  # [:10]
-#         elif split == "test_completion":
-#             transform = test_transform
-#             glob_d = os.path.join(
-#                 self.data_folder,
-#                 "data_depth_selection/test_depth_completion_anonymous/velodyne_raw/*.png"
-#             )
-#             glob_gt = None  # "test_depth_completion_anonymous/"
-#             glob_rgb = os.path.join(
-#                 self.data_folder,
-#                 "data_depth_selection/test_depth_completion_anonymous/image/*.png")
-#             if glob_gt is not None:
-#                 paths_d = sorted(glob.glob(glob_d))  # [:10]
-#                 paths_gt = sorted(glob.glob(glob_gt))  # [:10]
-#                 paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
-#             else:
-#                 # test only has d or rgb
-#                 paths_rgb = sorted(glob.glob(glob_rgb))
-#                 paths_gt = [None] * len(paths_rgb)
-#                 if split == "test_prediction":
-#                     paths_d = [None] * len(
-#                         paths_rgb)  # test_prediction has no sparse depth
-#                 else:
-#                     paths_d = sorted(glob.glob(glob_d))
-#         elif split == "test_prediction":
-#             transform = test_transform
-#             glob_d = None
-#             glob_gt = None  # "test_depth_completion_anonymous/"
-#             glob_rgb = os.path.join(
-#                 self.data_folder,
-#                 "data_depth_selection/test_depth_prediction_anonymous/image/*.png")
-#             if glob_gt is not None:
-#                 paths_d = sorted(glob.glob(glob_d))  # [:10]
-#                 paths_gt = sorted(glob.glob(glob_gt))  # [:10]
-#                 paths_rgb = sorted([get_rgb_paths(p) for p in paths_d])
-#             else:
-#                 # test only has d or rgb
-#                 paths_rgb = sorted(glob.glob(glob_rgb))
-#                 paths_gt = [None] * len(paths_rgb)
-#                 if split == "test_prediction":
-#                     paths_d = [None] * len(
-#                         paths_rgb)  # test_prediction has no sparse depth
-#                 else:
-#                     paths_d = sorted(glob.glob(glob_d))
-#         else:
-#             raise ValueError("Unrecognized split " + str(split))
-#         # print("Length of paths_rgb, paths_d, paths_gt ",len(paths_rgb), len(paths_d), len(paths_gt))
-#
-#         if len(paths_rgb) != len(paths_d) or len(paths_rgb) != len(paths_gt):
-#             print("Length of paths_rgb, paths_d, paths_gt not equal!",len(paths_rgb), len(paths_d), len(paths_gt))
-#             # Now, we split paths_rgb into left and right based on file names.
-#         paths_left = paths_rgb
-#         paths_right = [path.replace('image_02', 'image_03') for path in paths_left]
-#
-#         paths = {
-#                 "left_rgb": paths_left,
-#                 "right_rgb": paths_right,
-#                 "d": paths_d,
-#                 "gt": paths_gt,
-#         }
-#
-#         return paths, transform
-#
-#     def sample_paths(self, paths, sample_size):
-#         if sample_size == 0:
-#             # Return empty lists for all keys.
-#             return {key: [] for key in paths.keys()}
-#         else:
-#             # Get the total length assuming all keys have equal-length values.
-#             total_length = len(next(iter(paths.values())))  # Length of the first key.
-#             sample_indices = random.sample(range(total_length), sample_size)  # Generate sampled indices.
-#
-#             # Sample all dictionary values by index.
-#             sampled_paths = {
-#                 key: [value[i] for i in sample_indices] for key, value in paths.items()
-#             }
-#
-#         return sampled_paths
-#
-#     def __getraw__(self, index):
-#         left_rgb_path = self.paths['left_rgb'][index]
-#         right_rgb_path = self.paths['right_rgb'][index]
-#         if self.split == "val" and self.howtoval == "select":
-#             date = os.path.basename(left_rgb_path)[:10]
-#             camera_index = int(os.path.basename(left_rgb_path).split('image_0')[-1][0])
-#         else:
-#             date = left_rgb_path.split('/')[5]
-#             camera_index = int(left_rgb_path.split('image_0')[1][0])
-#
-#         calib_left = self.calib_params[date][2]
-#         calib_right = self.calib_params[date][3]
-#         # rgb_png = np.array(img_file, dtype=float) / 255.0 # scale pixels to the range [0,1]
-#         left_rgb = np.array(Image.open(left_rgb_path), dtype='uint8')
-#         right_rgb = np.array(Image.open(right_rgb_path), dtype='uint8')
-#
-#         depth_path = self.paths['d'][index]
-#         gt_path = self.paths['gt'][index]
-#         K_left = calib_left['K']
-#         # T = calib_left['RT'][:3, 3]
-#         # P = calib_left['P']
-#         K_right = calib_right['K']
-#         R_right = calib_right['R']
-#         T_right = calib_right['T']
-#         P = calib_left['P']
-#
-#
-#         # (375, 1242, 3) HWC->CHW (3,375, 1242)
-#         depth_pj_png = np.array(Image.open(depth_path), dtype='int')
-#         # complete_depth_png = np.array(Image.open(self.paths['cd'][index]), dtype='int')
-#         target_png = np.array(Image.open(gt_path), dtype='int')
-#
-#         assert np.max(depth_pj_png) > 255 and np.max(depth_pj_png), "np.max(depth_pj_png)={}".format(
-#             np.max(depth_pj_png))  # make sure we have a proper 16bit depth map here.. not 8bit!
-#
-#
-#         sparse = depth_pj_png.astype(float) / 256
-#         sparse = np.expand_dims(sparse, -1)  # (375, 1242, 1)->(1, 375, 1242)
-#
-#         target = target_png.astype(float) / 256
-#         target = np.expand_dims(target, -1)  # (375, 1242, 1)->(1, 375, 1242)
-#
-#         return left_rgb, right_rgb, sparse, target, date,camera_index,K_left, K_right, R_right, T_right,P
-#
-#     def __getitem__(self, index):
-#         left_rgb, right_rgb, sparse, target, date,camera_index,K_left, K_right, R_right, T_right,P = self.__getraw__(index)
-#         K_left=K_left.copy() if isinstance(K_left, np.ndarray) else K_left#Unrectified intrinsics; not used.
-#         K_right=K_right.copy() if isinstance(K_right, np.ndarray) else K_right
-#         R_right=R_right.copy() if isinstance(R_right, np.ndarray) else R_right
-#         T_right=T_right.copy() if isinstance(T_right, np.ndarray) else T_right
-#         P=P.copy() if isinstance(P, np.ndarray) else P
-#         position = AddCoordsNp(left_rgb.shape[0], left_rgb.shape[1])
-#         position = position.call()
-#         if self.split == "train":
-#             return_dict= self.transform(self.args,rgb_left=left_rgb,
-#                                           rgb_right=right_rgb,
-#                                           sparse=sparse,
-#                                           target=target,
-#                                           position=position,
-#                                           crop_width=self.args.crop_width,
-#                                           crop_height=self.args.crop_height,
-#                                           lidar_lines=self.args.lidar_lines,
-#                                           P=P)
-#         elif self.split == 'val' or self.split == 'test_completion'or self.split == 'test_prediction':
-#             return_dict = self.transform(self.args, rgb_left=left_rgb,
-#                                         rgb_right=right_rgb,
-#                                         sparse=sparse,
-#                                         target=target,
-#                                         position=position,
-#                                         crop_width=self.args.owidth,
-#                                         crop_height=self.args.oheight,
-#                                         lidar_lines=self.args.lidar_lines,
-#                                         P=P)
-#         points_d, d_index = pix2cam(return_dict['sparse'].squeeze(), P, return_idx=True, crop_info=return_dict['crop_info'])
-#         points_gt, gt_index = pix2cam(return_dict['target'].squeeze(), P, return_idx=True, crop_info=return_dict['crop_info'])
-#
-#         candidates = {"d": return_dict['sparse'], "points_d": points_d,
-#                 "d_index": d_index, "gt": return_dict['target'],
-#                 "points_gt": points_gt, "gt_index": gt_index,
-#                 'date': date, 'camera_index': camera_index, }
-#
-#         # Return crop metadata for left-right validation samples.
-#         candidates.update({"left_rgb": return_dict['rgb_left'],
-#                            "right_rgb": return_dict['rgb_right'],
-#                            'crop_top': return_dict['crop_info']['crop_top'],
-#                            'crop_left': return_dict['crop_info']['crop_left'],
-#                            'position':return_dict['position'],
-#                            # 'K_left': K_left,
-#                            # 'K_right': K_right,
-#                            # 'R_right': R_right,
-#                            # 'T_right': T_right,
-#                            'P': P,
-#                            })
-#         if'P_crop' in return_dict.keys():
-#             candidates.update({'P_crop': return_dict['P_crop']})
-#
-#         items = {
-#             key: to_float_tensor(val) if isinstance(val, np.ndarray) and val is not None else val
-#             for key, val in candidates.items()
-#         }
-#         return items
-#
-#         # print(index,rgb.shape)
-#         # path=self.paths['rgb'][index]
-#         # print(path)s
-#         # items = {
-#         #     key: to_float_tensor(val)
-#         #     for key, val in candidates.items() if val is not None
-#         # }
-#
-#     def __len__(self):
-#         return len(self.paths['d'])
 import numpy as np
 
 
@@ -709,9 +437,7 @@ def simulate_lidar_sampling(target, K,
     r = np.clip(r, 0, max_range)
     density_factor = 1 / (1 + 0.002 * r)  # Reduced decay factor for larger ranges.
     final_mask = (sparse > 0) & (np.random.rand(*sparse.shape) < density_factor)
-    #
     # # Optional GPS timestamp placeholder required by the protocol.
-    # sparse = np.pad(sparse, ((0, 0), (0, 4)), mode='constant') if sparse.shape[1] < w + 4 else sparse
 
     return sparse
 
@@ -757,7 +483,6 @@ class VirtualKitti2(data.Dataset):
         if split == 'val':
             np.random.seed(1000)
             all_indices = np.arange(len(paths['left_rgb']))
-            # val_idxs = np.random.choice(all_indices, 300, replace=False)
             val_idxs = all_indices
             paths['left_rgb'] = [paths['left_rgb'][i] for i in val_idxs]
             paths['right_rgb'] = [paths['right_rgb'][i] for i in val_idxs]
@@ -793,7 +518,6 @@ class VirtualKitti2(data.Dataset):
         mask = (np.random.rand(h, w) < 0.05 )& (target>0)  # Randomly sample 5% of pixels.
 
         sparse = np.where(mask, target, 0)  # Set unsampled points to zero.
-        # sparse=simulate_lidar_sampling(target,P,line_num=64,hori_interval=0.2,max_range=655)
         sparse = np.expand_dims(sparse, -1)
         target = np.expand_dims(target, -1)
 

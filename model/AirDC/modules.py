@@ -53,10 +53,7 @@ class Custom_Hourglass(nn.Module):
                      use_relu=False,
                      depth_wise=True if self.args.depth_wise else False)
         )
-        # self.backbone=Backbone_rgbd()
         self.hourglass1 = Hourglass(args, in_channels=args.embed_channels)
-        # self.hourglass2 = Hourglass(in_channels=embed_channels)
-        # self.hourglass3 = Hourglass(in_channels=embed_channels)
         self.classifier = nn.Sequential(
             Conv3dGn(in_channels=args.embed_channels, out_channels=args.embed_channels, kernel_size=3, stride=1,
                      padding=1, dilation=1,
@@ -64,16 +61,6 @@ class Custom_Hourglass(nn.Module):
             nn.Conv3d(in_channels=args.embed_channels, out_channels=1, kernel_size=3, stride=1, padding=1,
                       dilation=1, bias=False)
         )
-        # self.out2 = nn.Sequential(
-        #     Conv3dGn(in_channels=self.embed_channels, out_channels=self.embed_channels, kernel_size=3, stride=1, padding=1, dilation=1,
-        #              use_relu=True),
-        #     nn.Conv3d(in_channels=self.embed_channels, out_channels=1, kernel_size=3, stride=1, padding=1, dilation=1, bias=False)
-        # )
-        # self.out3 = nn.Sequential(
-        #     Conv3dGn(in_channels=self.embed_channels, out_channels=self.embed_channels, kernel_size=3, stride=1, padding=1, dilation=1,
-        #              use_relu=True),
-        #     nn.Conv3d(in_channels=self.embed_channels, out_channels=1, kernel_size=3, stride=1, padding=1, dilation=1, bias=False)
-        # )
         self.out_feat=Conv3dGn(in_channels=args.embed_channels,out_channels=out_feat_channels,
                                kernel_size=3, stride=1, padding=1,dilation=1, use_relu=True,
                                depth_wise=True if self.args.depth_wise else False)
@@ -84,8 +71,6 @@ class Custom_Hourglass(nn.Module):
         _, _, hourglass_feat1 = self.hourglass1(conv1_out_all, scale1=None,
                                               scale2=None, scale3=conv1_out_all)  # b,32,D,64,128
         out_all = self.classifier(hourglass_feat1)  # [B, 1, 1/4D, 1/4H, 1/4W]
-        # prob_all = F.softmax(out_all.squeeze(1), dim=1)
-        # init_depth_all = depth_regression(prob_all,max_depth=max_depth,interval=interval)
         prob_all = F.softmax(
             F.interpolate(out_all, size=(max_depth,h_img, w_img), mode='trilinear').squeeze(1),
             dim=1)
@@ -253,22 +238,6 @@ class feature_extraction(nn.Module):
 
         return output_feature
 
-#
-# class DisparityRegression(nn.Module):
-#
-#     def __init__(self, D,max_disp):
-#         super().__init__()
-#         self.D = D
-#         self.max_disp = max_disp
-#         self.disp_score = torch.range(0, D - 1)  # [D]
-#         self.disp_score = self.disp_score.unsqueeze(0).unsqueeze(2).unsqueeze(3)  # [1, D, 1, 1]
-#
-#     def forward(self, prob):
-#         disp_score = self.disp_score.expand_as(prob).type_as(prob)  # [B, D, H, W]
-#         out = torch.sum(self.max_disp * disp_score * prob/(self.D-1), dim=1)  # [B, H, W]
-#         return out
-
-
 class Conv3dGn(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1,
                  use_relu=True,use_norm=True,depth_wise=False,deconv=False,output_padding=0):
@@ -325,51 +294,6 @@ class Conv3dGn(nn.Module):
     def forward(self, inputs):
         out = self.net(inputs)
         return out
-
-
-# class DepthSE(nn.Module):
-#     def __init__(self, channels, depth, reduction=16):
-#         super().__init__()
-#         # squeeze spatial dims, keep depth
-#         self.avg_pool = nn.AdaptiveAvgPool3d((depth, 1, 1))
-#         self.fc = nn.Sequential(
-#             nn.Conv3d(1, 1, kernel_size=1, bias=False),  # operate on (b,1,D,1,1)
-#             nn.ReLU(inplace=True),
-#             nn.Conv3d(1, 1, kernel_size=1, bias=False),
-#             nn.Sigmoid()
-#         )
-#     def forward(self, x):
-#         # x: b x C x D x H x W
-#         y = x.mean(1, keepdim=True)           # b x 1 x D x H x W
-#         y = self.avg_pool(y)                  # b x 1 x D x 1 x 1
-#         y = self.fc(y)                        # b x 1 x D x 1 x 1
-#         return x * y                          # broadcast over C,H,W
-#
-# class FeatureAtt(nn.Module):
-#     def __init__(self, feat_ch, d_scale,cv_channels):
-#         super().__init__()
-#         self.feat_att = nn.Sequential(
-#             nn.Conv2d(feat_ch, d_scale, kernel_size=1, bias=True),
-#             nn.LeakyReLU(inplace=True),
-#             nn.Conv2d(d_scale, d_scale, kernel_size=1, bias=True)
-#         )
-#         # normalization after gating
-#         self.norm3d = nn.BatchNorm3d(cv_channels)
-#         # depth SE expects C and D
-#         self.depth_se = DepthSE(d_scale, depth=d_scale)
-#
-#     def forward(self, cv, feat):
-#         # cv: b x C x D x H x W
-#         # feat: b x feat_ch x H x W
-#         att2d = self.feat_att(feat).unsqueeze(1)   # b x d_scale x 1 x H x W
-#         gate = torch.sigmoid(att2d)               # b x d_scale x 1 x H x W
-#         # residual gate + normalization
-#         cv = cv * gate + cv                       # b x C x D x H x W
-#         # collapse channel for norm: swap dims to apply GN on channel dim
-#         cv = self.norm3d(cv)
-#         cv = self.depth_se(cv)
-#         return cv
-
 
 class ChannelAttentionEnhancement(nn.Module):
     def __init__(self, in_planes, ratio=16):
@@ -442,14 +366,13 @@ class ASDA(nn.Module):
         self.fuse3d_small = nn.Conv3d(embed_channels, in_channels, 1, bias=False)
         self.fuse3d_large = nn.Conv3d(embed_channels, in_channels, 1, bias=False)
 
-        # ——— Adaptive gate. ———
-        # self.gate_conv = nn.Conv2d(embed_channels*2, 1, kernel_size=1)
+        # Adaptive gate.
         self.gate_conv3d = nn.Conv3d(embed_channels, 1, kernel_size=1, bias=False)
 
     def forward(self, x3d, feat2d):
         B, C3d, D, H, W = x3d.shape
         # Two ASAU branches.
-        # ——— Small-kernel branch. ———
+        # Small-kernel branch.
         p3d_s = self.proj3d_small(x3d)                            # [B,E,D,H,W]
         p2d_s = self.proj2d_small(feat2d).unsqueeze(2).expand(-1,-1,D,-1,-1)
         fused_s = p3d_s + p2d_s                                   # [B,E,D,H,W]
@@ -457,7 +380,7 @@ class ASDA(nn.Module):
         attn_s = self.attn_small(flat_s)                          # [B*D,E,H,W]
         attn_s = attn_s.view(B, D, -1, H, W).permute(0,2,1,3,4)    # [B,E,D,H,W]
         out_s = self.fuse3d_small(attn_s)                         # [B,C3d,D,H,W]
-        # ——— Large-kernel branch. ———
+        # Large-kernel branch.
         p3d_l = self.proj3d_large(x3d)
         p2d_l = self.proj2d_large(feat2d).unsqueeze(2).expand(-1,-1,D,-1,-1)
         fused_l = p3d_l + p2d_l
@@ -465,15 +388,8 @@ class ASDA(nn.Module):
         attn_l = self.attn_large(flat_l)
         attn_l = attn_l.view(B, D, -1, H, W).permute(0,2,1,3,4)
         out_l = self.fuse3d_large(attn_l)
-        # return out_l
 
-        # ——— Adaptive gate computation. ———
-        # gate = torch.sigmoid(self.gate_conv(flat_s))              # [B*D,1,H,W]
-        # gate = gate.view(B, D, 1, H, W).permute(0,2,1,3,4)        # [B,1,D,H,W]
-
-        # return out_s * gate + out_l * (1 - gate)
-        #
-         # —— Fuse branches with a 3D gate. ——
+        # Fuse branches with a 3D gate.
         gate_feat = attn_s+attn_l        # [B,E,D,H,W]
         gate = torch.sigmoid(self.gate_conv3d(gate_feat))       # [B,1,D,H,W]
         return out_s * gate + out_l * (1 - gate)
@@ -504,7 +420,6 @@ class Hourglass(nn.Module):
                                kernel_size=3, stride=2, padding=1, output_padding=1, bias=False,
                                ),
             nn.GroupNorm(num_groups=16,num_channels=in_channels*2)
-            # nn.ReLU(inplace=True)
         )
         self.net4 = nn.Sequential(
             nn.ConvTranspose3d(in_channels=in_channels*2, out_channels=in_channels,
@@ -522,9 +437,7 @@ class Hourglass(nn.Module):
                                           in_channels*2,
                                           att_embed_channels,
                                           small_kernel=1,large_kernel=7)
-            # self.att3=ASDA(feat_channels[0],
             #                               in_channels,args.embed_channels,
-            #                               small_kernel=1,large_kernel=3)
 
     def forward(self, inputs, scale1=None,
                     scale2=None, scale3=None,
@@ -547,8 +460,6 @@ class Hourglass(nn.Module):
         if scale3 is not None:
             net4_out = net4_out + F.interpolate(scale3,size=net4_out.size()[2:] ,
                                     mode='trilinear', align_corners=False)
-            # if features is not None:
-                # net4_out = self.att3(net4_out,features[0])
             net4_out = F.interpolate(net4_out, size=inputs.size()[2:] ,
                                     mode='trilinear', align_corners=False)
 
@@ -1066,9 +977,6 @@ class Feature(nn.Module):
         chans = [16, 24, 32, 96, 160]
 
         # Optional convolution for x0 features.
-        # self.conv_x0 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
-        # self.bn_x0 = nn.GroupNorm(16,out_channels)
-        # self.act_x0 = nn.ReLU6(inplace=False)
         if in_channels != 3:
             # Redefine conv_stem for non-RGB input channels.
             out_channels = model.conv_stem.out_channels  # Original conv_stem output channels.
@@ -1105,7 +1013,6 @@ class Feature(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
     def forward(self, input):
-        # x0 = self.act_x0(self.bn_x0(self.conv_x0(input)))
         x = self.act1(self.bn1(self.conv_stem(input)))
         x2 = self.block0(x)
         x4 = self.block1(x2)
@@ -1260,8 +1167,6 @@ class MultiBasicEncoder(nn.Module):
         self.geo_planes = geo_planes
         self.args = args
 
-        # self.norm_111 = nn.BatchNorm2d(128, affine=False, track_running_stats=False)
-        # self.norm_222 = nn.BatchNorm2d(128, affine=False, track_running_stats=False)
 
         if self.norm_fn == 'group':
             self.norm1 = nn.GroupNorm(num_groups=8, num_channels=64)
@@ -1374,7 +1279,6 @@ class MultiBasicEncoder(nn.Module):
         if self.args.convolutional_layer_encoding!='std' and depth_geo_feat is not None  :
              x_rgb = self.conv1_rgb(x)
              x_d = self.conv1_d(depth)
-             # x_d = self.conv1_d(depth_geo_feat[0])
              x = torch.cat([x_rgb,x_d],dim=1)
         elif self.args.convolutional_layer_encoding=='std' and depth is not None:
             x_rgb = self.conv1_rgb(x)

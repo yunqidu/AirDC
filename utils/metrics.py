@@ -2,7 +2,7 @@ import torch
 import math
 import numpy as np
 
-#####=========Loss and metric utilities.=========#####
+# Loss and metric utilities.
 
 def RMSE(output, target):
     valid_mask = target > 0.1
@@ -129,16 +129,7 @@ def evaluate_metrics(pred, target):
     metrics['far_iRMSE'] = masked_irmse(pred, target, far_mask)  # far-range mask
     metrics['far_iMAE'] = masked_imae(pred, target, far_mask)  # far-range mask
 
-    # num_near = near_mask.sum().item()
-    # num_far = far_mask.sum().item()
-    # num_total = valid_mask.sum().item()
-    #
-    # near_sum = metrics['near_RMSE'] * num_near
-    # far_sum = metrics['far_RMSE'] * num_far
-    # total_rmse_estimate = (near_sum + far_sum) / num_total
-
-
-    # —— 4. Compute relative depth metrics on valid pixels.
+    # Compute relative depth metrics on valid pixels.
     # Flatten predictions and targets and keep valid pixels only.
     pred_valid   = pred[valid_mask]
     target_valid = target[valid_mask]
@@ -166,7 +157,6 @@ def evaluate_metrics(pred, target):
     metrics['log10'] = log10_err
 
     # Delta accuracy: ratio=max(d_pred/d_true, d_true/d_pred), counting pixels with ratio < 1.25^i.
-    #    i = 1, 2, 3
     # Compute ratio first = max(d_pred / d_true, d_true / d_pred)
     #    Add a small epsilon to avoid division by zero.
     ratio = torch.max(

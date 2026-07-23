@@ -1,7 +1,7 @@
 from utils import *
 import torch.nn.functional as F
 import os
-#####=========Visualization utilities.=========#####
+# Visualization utilities.
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -538,8 +538,6 @@ class DISPMSELoss_vis(nn.Module):
             self.visualize_pred_and_target(*depths, target=target,val=val,
                                            rgb_left=rgb_left,rgb_right=rgb_right,sparse=sparse)
             # visualize_all(self.args,depths[-1], target,save_path='tight_compare.png',
-            #                    rgb_left=rgb_left,rgb_right=rgb_right,
-            #                    sparse=sparse)
         gt = torch.clamp(target, min=0, max=self.args.z_max)
         seq_depth = [torch.clamp(pred, min=0, max=self.args.z_max) for pred in depths]
         if disp is not None:
@@ -558,16 +556,10 @@ class DISPMSELoss_vis(nn.Module):
             b,h,w = target.shape
             disp_gt[target>0]=(f.view(-1, 1)*self.args.baseline/(target.reshape(b,-1)+1e-6))[target.reshape(b,-1)>0]
 
-        # if agg_preds is not None:
-        #     agg_loss=0.0
-        #     mask0 = ((gt > 0) & (gt < self.args.z_max//4))
-        #     mask1 = ((gt > 0) & (gt < self.args.z_max//2))
-        #     mask = ((gt > 0) & (gt < self.args.z_max))
         #     agg_loss += 0.7 * F.smooth_l1_loss(agg_preds[0][mask0.bool()], gt[mask0.bool()], reduction='mean')
         #     agg_loss += 0.5 * F.smooth_l1_loss(agg_preds[1][mask1.bool()], gt[mask1.bool()], reduction='mean')
         #     agg_loss += 0.2 * F.smooth_l1_loss(agg_preds[2][mask.bool()], gt[mask.bool()], reduction='mean')
         #     loss += 1 * agg_loss
-        # if self.args.update_with == "selective" and self.args.attention_active:
         #     agg_loss += 0.7 * F.smooth_l1_loss(seq_disp[-1][mask0.bool()], gt[mask0.bool()], reduction='mean')
         #     agg_loss += 0.5 * F.smooth_l1_loss(seq_disp[-1][mask1.bool()], gt[mask1.bool()], reduction='mean')
         #     agg_loss += 0.2 * F.smooth_l1_loss(seq_disp[-1][mask.bool()], gt[mask.bool()], reduction='mean')
@@ -658,7 +650,6 @@ class DISPMSELoss_vis(nn.Module):
         """
         # Use the first batch element for depth and target maps.
         target_img = target[0, :, :]
-        # target_img[target_img>0]=(f[0]*self.args.baseline/(target_img+1e-6))[target[0]>0]
 
         depth_imgs = [depth[0, :, :] for depth in depths]
         
@@ -783,4 +774,3 @@ class DISPMSELoss_vis(nn.Module):
         plt.savefig(save_path, dpi=250)
         # swanlab.log({"vis_result": swanlab.Image(plt)})
         plt.close(fig)
-

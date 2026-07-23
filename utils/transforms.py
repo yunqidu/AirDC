@@ -301,7 +301,6 @@ class Rotate(object):
             img (numpy.ndarray (C x H x W)): Rotated image.
         """
 
-        # order=0 means nearest-neighbor type interpolation
         return skimage.transform.rotate(img, self.angle, resize=False, order=0)
 
 
@@ -370,8 +369,6 @@ class CenterCrop(object):
         j = int(round((w - tw) / 2.))
 
         # # randomized cropping
-        # i = np.random.randint(i-3, i+4)
-        # j = np.random.randint(j-3, j+4)
 
         return i, j, th, tw
 
@@ -438,8 +435,6 @@ class BottomCrop(object):
         crop_left = int(round((w - tw) / 2.))
 
         # Optional random horizontal crop logic.
-        # crop_top = np.random.randint(crop_top-3, crop_top+4)
-        # crop_left = np.random.randint(crop_left-1, crop_left+1)
 
         return crop_top, crop_left, th, tw
 

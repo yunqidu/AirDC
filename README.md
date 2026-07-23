@@ -60,7 +60,7 @@ Dataset sources:
 
 ### Checkpoints
 
-The following three checkpoints will be released before 2026-08-31. After release, download them from Google Drive and put them under the `log/` directory:
+The following three checkpoints will be released before 2026-07-31. After release, download them from Google Drive and put them under the `log/` directory:
 
 ```text
 AirDC/

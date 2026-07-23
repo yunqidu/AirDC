@@ -7,10 +7,7 @@ def disparity_regression(x, maxdisp):
     return torch.sum(x * disp_values, 1, keepdim=True)
 
 def context_upsample(disp_low, up_weights, up_factor=4):
-    ###
-    # cv (b,1,h,w)
-    # sp (b,9,4*h,4*w)
-    ###
+    # Upsample low-resolution depth with learned convex weights.
 
     b, c, h, w = disp_low.shape
 
@@ -18,7 +15,6 @@ def context_upsample(disp_low, up_weights, up_factor=4):
     disp_unfold = F.interpolate(disp_unfold, (h * up_factor, w * up_factor),
                                 mode='nearest').reshape(b, 9, h * up_factor, w * up_factor)
     disp_nei = (disp_unfold * up_weights).sum(dim=1, keepdim=True)
-    # disp = (disp_unfold * up_weights).sum(1)
     return disp_nei.squeeze(1)
 
 
@@ -104,7 +100,6 @@ def project_left_to_right_with_crop_batch(left_depth_map, baseline, f,
     v = left_depth_map[:, :, 1]  # (B, N)
     d = left_depth_map[:, :, 2]  # (B, N)
     # Back-project to 3D camera coordinates. (X, Y, Z)
-    # X = (u_orig) - crop_top[:, None]/down_factor
     X = left_depth_map[:, :, 0]
     Y = v - (baseline * f.unsqueeze(1) / (d * down_factor + 1e-4))
 
